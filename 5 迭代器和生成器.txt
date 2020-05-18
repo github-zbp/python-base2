@@ -1,0 +1,66 @@
+什么是迭代器：
+迭代器是访问序列中元素的一种方式，一般用来遍历数据。for能遍历就是迭代器的作用。
+
+迭代器和以下标的访问方式不同，迭代器不能返回。
+
+可迭代对象Iterable 和 迭代器Iterator
+
+
+
+概念：
+可迭代对象就是实现了魔术方法 __iter__ 的对象。实现了这个魔术方法的对象就可以使用for循环遍历，例如list，dict，set，tuple都是可迭代对象，他们都实现了__iter__方法。其实list，dict，set，tuple类型的对象都继承自Iterable对象。
+
+print(isinstance(list(),Iterable))
+print(isinstance(set(),Iterable))
+print(isinstance(tuple(),Iterable))
+print(isinstance({},Iterable))
+
+都是True
+
+迭代器是实现了魔术方法 __iter__ 和 __next__ 的对象。
+
+Iterator迭代器 是继承自 Iterable 迭代对象的。
+
+
+
+可迭代对象和迭代器这两个概念之间有一个包含与被包含的关系，如果一个对象是迭代器，那么这个对象肯定是可迭代的；但是反过来，如果一个对象是可迭代的，那么这个对象不一定是迭代器。
+
+下面是可迭代对象和迭代器的源码：
+class Iterable(metaclass=ABCMeta):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __iter__(self):
+        while False:
+            yield None
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Iterable:
+            return _check_methods(C, "__iter__")
+        return NotImplemented
+
+
+class Iterator(Iterable):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __next__(self):
+        'Return the next item from the iterator. When exhausted, raise StopIteration'
+        raise StopIteration
+
+    def __iter__(self):
+        return self
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Iterator:
+            return _check_methods(C, '__iter__', '__next__')
+        return NotImplemented
+        
+
+
+        
+迭代器和可迭代对象的区别：

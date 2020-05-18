@@ -1,0 +1,74 @@
+3.明明想在学校中请一些同学一起做一项问卷调查，为了实验的客观性，他先用计算机生成了N个1到1000之间的随机整数（N≤1000），对于其中重复的数字，只保留一个，把其余相同的数去掉，不同的数对应着不同的学生的学号。然后再把这些数从小到大排序，按照排好的顺序去找同学做调查。请你协助明明完成“去重”与“排序”的工作(同一个测试用例里可能会有多组数据，希望大家能正确处理)。
+
+
+
+Input Param
+
+n               输入随机数的个数
+
+inputArray      n个随机整数组成的数组
+
+
+Return Value
+
+OutputArray    输出处理后的随机整数
+
+
+
+注：测试用例保证输入参数的正确性，答题者无需验证。测试用例不止一组。
+
+样例输入解释：
+样例有两组测试
+第一组是3个数字，分别是：2，2，1。
+第二组是11个数字，分别是：10，20，40，32，67，40，20，89，300，400，15。
+
+import sys
+while True:
+    number = sys.stdin.readline()
+    vals = []
+    
+    for i in range(int(number)):
+        val= sys.stdin.readline()
+        vals.append(int(val))
+        
+    vals=list(set(vals))
+    vals.sort()
+    for i in vals:
+        print(i)
+        
+        
+sys.stdin.readline()和input()的作用一样
+由于他不只输入一组数据，所以要使用while True
+
+
+4.
+连续输入字符串，请按长度为8拆分每个字符串后输出到新的字符串数组；
+长度不是8整数倍的字符串请在后面补数字0，空字符串不处理。
+
+输入描述:
+连续输入字符串(输入2次,每个字符串长度小于100)
+
+输出描述:
+输出到长度为8的新字符串数组
+
+import math
+
+
+def changeList(str1):
+    counts = math.ceil(len(str1) / 8)
+    zero_num = counts * 8 - len(str1)
+
+    list1 = []
+    for i in range(counts):
+        list1.append(str1[i * 8:(i + 1) * 8])
+
+    list1[-1] = list1[-1] + "0" * zero_num
+    return list1
+
+res_list = []
+for i in range(2):
+    words = input()
+    res_list.extend(changeList(words))
+
+for i in res_list:
+    print(i)
