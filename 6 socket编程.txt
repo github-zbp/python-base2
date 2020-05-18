@@ -1,0 +1,279 @@
+1.使用socket实现client和server
+
+服务端：创建套接字-->绑定套接字(IP和端口)-->监听套接字-->接收和发送消息
+
+客户端： 创建套接字-->连接服务端的socket-->发送和接收消息
+
+server.py
+
+import socket 
+
+# AF_INET是ipv4类型；SOCK_STREAM是字节流，即TCP协议；如果是SOCK_DGRAM是数据包，即UDP协议
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)；返回的server 是一个套接字对象
+server.bind(("0.0.0.0",8000))   # 绑定ip和port
+server.listen() # 监听socket
+
+while True:
+    sock,addr = server.accept() # 阻塞的尝试获取客户端的数据包;sock是客户端的socket对象
+    
+    data = sock.recv(1024)    # 一次只获取1k数据，即1一个包就是1k的数据
+    
+    # 返回的数据是byte类型，要转为字符类型
+    print(data.decode("utf-8"))
+
+    sock.close()    # 记得关闭客户端socket
+
+    
+    
+    
+client.py
+
+import socket 
+
+client = socket.socket(sock.AF_INET,sock.SOCK_STREAM)
+
+# 连接服务端
+client.connect()
+
+# 发送数据
+client.send(b"Hello")       # 必须发一个byte类型的数据
+
+# 关闭socket
+client.close()
+
+
+上面有几个关键点：
+1.服务端中有多个socket套接字：
+server = socket.socket()
+
+以及
+
+sock,addr = server.accept() 中的sock
+
+其中 server这个套接字是服务端用于监听ip和port的套接字
+而 sock 是客户端套接字，也就是用于和客户端进行消息接收(recv())和消息发送(send())的套接字
+
+即使 server这个套接字close()了，只要sock没有close，客户端和服务端就可以进行通信
+
+
+2.socket的accept()方法
+这个方法会阻塞住程序，只有当客户端建立连接(客户端执行connect()方法)的时候，accept()才会返回套接字和地址，并解除阻塞。
+要记住的是：客户端发起一次连接(connect())，accept()就会返回一个客户端sock。
+
+比如，一个客户端，连续发起多次连接；或者多个客户端同时连接服务端；都会解除accept阻塞并返回一个sock，每个sock不同。而服务端可以通过不同的sock和不同的客户端进行通信。
+
+PS：connect()就是三次握手的过程。
+sock.close()是关闭连接，也就是四次挥手的过程
+
+
+3.请在客户端和服务端两边都关闭连接
+sock.close() 和 client.close()
+
+根据上面这些知识，我们可以模拟聊天室。
+
+4.recv()方法会阻塞，如果A执行了recv()就会阻塞，B执行send()给A发消息时，recv()才会解除阻塞并接受到消息。
+recv的第一个参数指定了一次性接受数据的大小。其原理是设置了一个特定大小的缓冲区。
+如果B的send()发送了超过A中recv()缓存区的大小，A就只能接受到缓冲区设定的大小的数据，除非A调用多次recv()才能将B的数据接收完。
+
+如果B发送空数据给A，A的recv()不会解除阻塞。
+
+
+2-1 单对单聊天室
+
+# coding=utf-8
+
+# Server.py
+import socket
+class Server:
+    def __init__(self,ip="127.0.0.1",port=8000):
+        self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.ip = ip
+        self.port=port
+        self.server.bind((ip,port))
+        self.server.listen()
+
+        self.sock = None      # 客户端socket，用于和客户端通信
+
+    def accept(self):
+        self.sock,addr = self.server.accept()   # 接收客户端发起的连接
+
+        while True:
+            res = self.contact()  # 接收和回复消息
+
+            if not res:
+                break
+
+        # 关闭连接
+        self.sock.close()
+
+    def contact(self):
+        # 先接收消息
+        msg = self.sock.recv(1024).decode("utf-8")     # 一次接收 1024 个字节，而且假定用户聊天每次发送的消息小于1024（即每次都能接收完）
+
+        # 如果客户端发送exit,则关闭连接
+        if msg=="exit":
+            return False
+
+        print(msg)
+
+        # 回复消息
+        reply = input()
+        while not reply:   # 一定要加这个while,否则服务端发空消息就会出现这种情况，Server进入input()的阻塞。而client的recv()接到空消息不解除阻塞。相当于server和client都阻塞住
+            reply = input()
+
+        self.sock.send(reply.encode("utf-8"))
+
+        return True
+
+
+if __name__ == "__main__":
+    server = Server()
+    server.accept()
+
+
+    # coding=utf-8
+
+    
+    
+#client.py
+import socket
+
+class Client:
+    def __init__(self,server_ip="127.0.0.1",server_port=8000):
+        # 创建一个套接字
+        self.client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+        # 连接服务端的套接字
+        self.client.connect((server_ip,server_port))
+
+    # 和服务端通信
+    def contact(self):
+        while True:
+            # 先发送消息
+            msg = input()
+            while not msg:      # 一定要加个while
+                msg = input()
+
+            self.client.send(msg.encode())
+
+            if msg=="exit":
+                break
+
+            # 再接收回复的消息
+            reply = self.client.recv(1024)
+            print(reply.decode())
+
+        self.client.close()   # 关闭连接
+
+if __name__ == "__main__":
+    client = Client()
+    client.contact()
+
+
+    
+上面的代码有两个问题：
+A.每次只能最多只能接受1024字节的数据量
+B.必须客户端发送一次消息，服务端就要回一次消息；如果客户端连续发两次消息，或者服务端连续发两次消息就不行。
+    
+    
+2-2 单对多聊天室
+现在有一个服务端，多个客户端。如何实现服务端同时对多个客户端通信呢。
+可以在2-1的基础上加上多线程。
+
+每当有一个客户端连接进来的时候就创建一个线程。
+实现如下：
+
+只需要做稍许改动即可
+
+# coding=utf-8
+
+import socket
+from threading import Thread
+
+class Server:
+    def __init__(self,ip="127.0.0.1",port=8000):
+        self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.ip = ip
+        self.port=port
+        self.server.bind((ip,port))
+        self.server.listen()
+        self.i=1
+
+        #self.sock = None      # 客户端socket，用于和客户端通信
+
+    def accept(self):
+        while True:     # 死循环可以接受多个客户端的连接
+            sock,addr = self.server.accept()   # 接收客户端发起的连接
+
+            # 每建立一次连接就开一个线程，一个线程负责一个客户端的通信
+            thread = Thread(target=self.contact,args=(sock,self.i))
+            thread.start()
+
+            self.i+=1
+
+    def contact(self,sock,i):
+        print("Client %d connected" % i)
+        while True:
+            # 先接收消息
+            msg = sock.recv(1024).decode("utf-8")     # 一次接收 1024 个字节，而且假定用户聊天每次发送的消息小于1024（即每次都能接收完）
+
+            # 如果客户端发送exit,则关闭连接
+            if msg=="exit":
+                break
+
+            print("client %d:%s" % (i,msg))
+
+            # 回复消息
+            reply = input()
+            while not reply:   # 一定要加这句
+                reply = input()
+
+            sock.send(reply.encode("utf-8"))
+
+        sock.close()
+
+
+if __name__ == "__main__":
+    server = Server()
+    server.accept()
+    
+客户端代码不用动
+
+
+
+接下来使用socket套接字简单的实现http请求
+
+# coding=utf-8
+
+import socket
+from urllib.parse import urlparse
+
+def get(url):
+    url_dict =urlparse(url)
+    host = url_dict.netloc
+    path = url_dict.path
+
+    if path=="":
+        path="/"
+
+    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    sock.connect((host,80))     # sock连接的时候可以传域名
+
+    # 发送内容包括请求行和请求头。http报文以两个\r\n为结束标志
+    post = "GET %s HTTP/1.1\r\nHost:%s\r\nConnection:close\r\n\r\n" % (path,host)
+    sock.send(post.encode())
+
+    # 接受消息
+    each_html = sock.recv(1024)
+    html=b""
+    while each_html:
+        html += each_html
+        each_html=sock.recv(1024)
+
+
+    print(html.decode())
+
+get("http://www.baidu.com")
+
+得到的数据是响应行，响应头和响应体。
+

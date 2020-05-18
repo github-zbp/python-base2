@@ -1,0 +1,2326 @@
+Python中的GIL锁
+
+GIL 全局解释器锁
+
+python中一个线程对应于c语言中的一个线程。
+
+GIL锁是“一个进程有且仅有一个的锁，该锁用于控制多线程同一时刻只能有一个线程使用CPU”
+
+GIL使得同一时刻，只有一个线程运行在一个CPU上。这意味着一个进程中多个线程只能用到一个CPU而无法将多个线程映射到多个CPU上（即使你的电脑有多核CPU），所以这个进程中的多线程是并发的而不是并行的（即同一时刻只有一个线程在运行）。
+
+当然，GIL的存在不意味着我们不需要进行线程间的同步，因为即使是单核计算机下线程的并发也会造成资源的竞争。
+
+GIL锁作用的整个过程是这样的：
+一个线程A想要使用CPU来执行程序就要先拿到进程中的GIL锁，拿到GIL锁的线程才能够执行，其他线程无法执行。
+当A执行到时间片结束或者即使时间片没有结束但是A遇到阻塞（如IO操作，或者等待其他线程互斥锁的释放等情况），A就会释放GIL锁，让另一个线程B占有这个锁，这样线程B就可以占有CPU并运行。
+通过上述方式，多个线程间轮流获取GIL锁和CPU并发的运行（可以理解为CPU是被GIL锁住的，如果线程B要使用CPU必须等线程A释放GIL锁才能使用CPU）。
+
+因此，GIL锁的释放只需满足以下两个条件中的一个：
+1.线程的时间片使用完毕（或者运行完一定行数的字节码）
+2.线程遇到阻塞/等待的状态，此时即使时间片没有用完也会释放GIL锁
+
+    
+有些人会有一个误区，认为一个线程完全执行完才会释放GIL锁给其他线程执行。这样是错的，这样多线程就不是并发而是串行了。
+
+
+==================================================
+
+多线程编程
+
+下面以爬虫作为例子，爬虫是一个很适合使用多线程完成的任务
+
+1. 通过Thread类+函数创建线程
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+
+def get_detail_url():
+    print("开始爬取文章url")
+    sleep(1)    # 通过sleep模拟爬取过程
+    print("文章url爬取结束")
+
+def get_detail_content():
+    print("开始爬取文章详情")
+    sleep(2)    # 通过sleep模拟爬取过程
+    print("文章详情爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    t1 = Thread(target=get_detail_url)
+    t2 = Thread(target=get_detail_content)
+    t1.start()
+    t2.start()
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+结果如下：
+主线程负责计时
+开始爬取文章url
+开始爬取文章详情
+任务结束，耗时：0.00
+文章url爬取结束
+文章详情爬取结束
+
+分析：上面的进程中有3个线程，主线程，t1线程和t2线程。由于3个线程间是并发执行，所以他们是同时执行的，主线程不会等待另外两个线程执行完才结束。所以,t1,t2线程没有执行完的时候，主线程就已经执行到print("任务结束，耗时：%.2f" % (et-st))，得到耗时为0.00
+然后，主线程结束。
+
+但是t1,t2线程没有执行完，所以进程没有结束，即这个脚本没有结束。进程要等最后一个线程执行完后才会结束。
+
+因此，t2线程最后才执行完，t2执行完后，脚本才结束。所以
+“文章url爬取结束”
+“文章详情爬取结束”
+可以得到输出
+
+结论：主线程不会等待t1,t2线程结束才结束，但是整个进程会等待t1,t2线程结束才结束。（进程会等待进程内所有线程结束才结束）
+
+需求1：我希望t1,t2线程执行完才执行主线程的 print；
+可以通过join方法，让主线程等待t1,t2线程的执行完才往下执行，这个过程会阻塞主线程。    
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    t1 = Thread(target=get_detail_url)
+    t2 = Thread(target=get_detail_content)
+    t1.start()
+    t2.start()
+    
+    t1.join()
+    t2.join()   # 会等待t1,t2运行完
+    
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+结果：
+主线程负责计时
+开始爬取文章url
+开始爬取文章详情
+文章url爬取结束
+文章详情爬取结束
+任务结束，耗时：2.00
+    
+PS：多个join之间不会阻塞，也就是说t1.join()执行完后，t2.join()可以立刻执行，但是t2.join()后的主线程代码会被阻塞。
+
+
+需求2：我希望主线程结束时进程也结束（脚本结束），即使t1,t2线程没有执行完。
+可以通过 setDaemon(True) 将t1,t2设为守护线程来实现
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    t1 = Thread(target=get_detail_url)
+    t2 = Thread(target=get_detail_content)
+    t1.setDaemon(True)      # 设为守护线程
+    t2.setDaemon(True)      # 设为守护线程
+    t1.start()
+    t2.start()
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+结果：
+主线程负责计时
+开始爬取文章url
+开始爬取文章详情
+任务结束，耗时：0.00
+
+假如 将 t1.setDaemon(True) 注释掉，结果为：
+主线程负责计时
+开始爬取文章url
+开始爬取文章详情
+任务结束，耗时：0.00
+文章url爬取结束
+
+因为 t1不是守护线程，t2是守护线程，那么进程会等待t1结束才结束，但不会等待t2结束。
+
+结论：进程会等待不是守护线程的线程结束就结束。而守护线程即使还没执行完也会结束掉。
+
+
+2. 通过继承Thread类创建线程
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+
+class GetDetailUrl(Thread):
+    def __init__(self,name):
+        super(GetDetailUrl,self).__init__()
+        self.name=name
+
+    def run(self):
+        print(self.name+" 开始爬取文章url")
+        sleep(1)    # 通过sleep模拟爬取过程
+        print("文章url爬取结束")
+
+class GetDetailContent(Thread):
+    def __init__(self,name):
+        super(GetDetailContent,self).__init__()
+        self.name=name
+
+    def run(self):
+        print(self.name+"开始爬取文章详情")
+        sleep(2)    # 通过sleep模拟爬取过程
+        print("文章详情爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    t1 = GetDetailUrl(name="get_detail_url")
+    t2 = GetDetailContent(name="get_detail_content")
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+
+PS：使用继承Thread的方式要重写run()方法
+
+
+==================================================
+
+线程间通信 - 共享变量和队列Queue
+
+如果，多线程之间要完成的任务是相互独立互不干扰的话，那么线程之间是不需要进行通信的，自己干自己的事就行。
+
+但是如果多线程之间要进行合作，那么就必须要进行线程通信。
+
+还是以上面的爬虫为例子。
+
+get_detail_url 用于爬取列表页中的文章url
+get_detail_content 用于爬取文章详情
+
+那么 get_detail_content 必须获取到 get_detail_url 爬到的url才能对文章页进行爬取详情。这就存在合作关系了。
+
+
+
+
+合作方式1：使用共享变量
+我们知道，进程是资源分配的基本单位，系统会给进程分配内存空间等资源，但是不会为线程分配内存等资源。所以一个进程内的所有线程是共享进程中内存块的数据的，这就是共享变量。
+
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+
+urls = []   # 任务列表，用于存放要爬取的文章详情url
+is_finished = False     
+
+def get_detail_content(urls,name):
+    global is_finished
+
+    print("%s开始爬取文章内容" % name)
+    while not is_finished or len(urls): # 如果生产者没有生产完或者生产者生产完了但消费者没有消费完就从urls取出url进行爬取
+        try:
+            url = urls.pop()
+            sleep(0.001)    # 爬取1个内容页花0.001秒
+            print("%s 文章：%s 爬取结束" % (name,url))
+        except:     # 这里是为了防止消费者消费太快，当生产者还在生产但urls元素为0时，pop会报错。此时应该重新判断urls中是否有元素
+            continue
+    print("所有文章内容爬取结束")
+
+def get_detail_url(urls):
+    global is_finished
+
+    print("开始爬取文章列表页")
+    art_id = 10000  # 假设共有10000个文章url
+    page_url_num = 100
+    start_id = 1
+    while start_id<10000:
+        end_id = start_id+page_url_num
+        for id in range(start_id,end_id): # 假设有100页列表页，每一页有100个url，共10000个url
+            url = "http://www.zbpblog.com/blog/%d.html" % id
+            urls.append(url)
+        sleep(0.01)    # 爬一个列表页花0.01秒
+        start_id = end_id
+
+    is_finished=True
+    print("文章列表页爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    # 创建1个生产者线程
+    producer = Thread(target=get_detail_url,args=(urls,))
+
+    consumers = []
+    for i in range(3):  # 创建3个消费者线程
+        name="Thread %d" % (i+1)
+        consumer = Thread(target=get_detail_content,args=(urls,name))
+        consumers.append(consumer)
+
+
+    producer.start()
+    sleep(0.1)  # 睡0.1秒是为了让生产者先生产些链接到urls中
+
+    for consumer in consumers:
+        consumer.start()
+
+    producer.join()
+    for consumer in consumers:
+        consumer.join()
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+    
+上面的程序中有生产者 get_detail_url, 还有消费者 get_detail_content
+生产者负责往 urls 中添加元素，消费者负责从urls取出元素并进行爬取内容，通过这种方式进行合作，合作的媒介就是urls这个共享变量。
+
+共享变量有两个 
+urls ：存放产品的容器
+is_finished ：判断生产者是否生成完毕
+
+上面生产者的生成速度是1个消费者消费产品速度的10倍。所以如果将消费者线程从3个跳到10个，可以提高效率，从16~18秒缩减到4~6秒。
+
+
+虽然共享变量可以实现线程间通信，但是这种使用共享变量通信的方式是线程不安全的。原因很简单，生产者和3个消费者这4个线程共同竞争使用urls这一个资源，很可能会导致urls被改乱造成数据不一致的问题。结果就是，消费者可能重复消费同一个产品或者有些产品没能append到urls中。
+
+所以一般共享变量要结合锁来保证线程竞争的使用这个资源变量时是安全有序的。
+
+
+
+合作方式2：使用Queue队列
+
+Queue相比于普通的list结构而言，Queue是线程安全的，而list不是线程安全的。原因是Queue内部使用了锁和条件变量来进行线程同步，但是list没有用到线程同步技术。
+
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+from queue import Queue
+
+urls = Queue(500)   # 任务队列，用于存放要爬取的文章详情url，队列最多容纳500个任务
+
+def get_detail_content(urls,name):
+    print("%s开始爬取文章内容" % name)
+    while True:
+        url = urls.get()    # 当队列为空时，get会阻塞线程，线程进入休眠，直到队列有元素才会被唤醒
+        sleep(0.001)    # 爬取1个url花0.001秒
+        print("%s 文章：%s 爬取结束" % (name,url))
+
+    print("所有文章内容爬取结束")
+
+def get_detail_url(urls):
+    print("开始爬取文章列表页")
+    art_id = 10000  # 假设共有10000个文章url
+    page_url_num = 100
+    start_id = 1
+    while start_id<10000:
+        end_id = start_id+page_url_num
+        for id in range(start_id,end_id): # 假设有100页列表页，每一页有100个url，共10000个url
+            url = "http://www.zbpblog.com/blog/%d.html" % id
+            urls.put(url)   # 如果队列满了，put会阻塞线程，线程进入休眠，直到队列有空间了，线程才被唤醒
+        sleep(0.01)    # 爬一个列表页花0.01秒
+        start_id = end_id
+
+    print("文章列表页爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    # 创建1个生产者线程
+    producer = Thread(target=get_detail_url,args=(urls,))
+
+    consumers = []
+    for i in range(10):  # 创建10个消费者线程
+        name="Thread %d" % (i+1)
+        consumer = Thread(target=get_detail_content,args=(urls,name))
+        consumers.append(consumer)
+
+
+    producer.start()
+
+    for consumer in consumers:
+        consumer.start()
+
+    producer.join()
+    for consumer in consumers:
+        consumer.join()
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+    
+这个例子相比于之前的使用非线程安全的共享变量而言，queue是保证了线程安全的。
+
+但是这个例子有一个小缺陷：当所有任务消费完之后，所有消费者线程都在执行urls.get()时进入阻塞。
+这就导致主线程一直等待消费者线程结束。
+所以整个进程无法结束，也不能打印出任务执行的时间。
+
+
+我们可以稍微改进一下：
+思路如下：
+1.设置进程不等待消费者线程和生产者线程执行结束而结束，所以对消费者和生产者线程使用 setDaemon(True) 设置为守护线程
+2.进程需要等待任务队列中的任务被执行完才结束，并且打印出任务耗时，这里可以使用 Queue的join()方法
+
+如下：
+
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+from queue import Queue
+
+urls = Queue(500)   
+#is_finished = False
+
+def get_detail_content(urls,name):
+    print("%s开始爬取文章内容" % name)
+    while True:
+        url = urls.get()    
+        sleep(0.001)    
+        urls.task_done()        # 标记这一次取出来的url任务已经执行完
+        print("%s 文章：%s 爬取结束" % (name,url))
+
+    print("所有文章内容爬取结束")
+
+def get_detail_url(urls):
+    print("开始爬取文章列表页")
+    art_id = 10000  # 假设共有10000个文章url
+    page_url_num = 100
+    start_id = 1
+    while start_id<10000:
+        end_id = start_id+page_url_num
+        for id in range(start_id,end_id): 
+            url = "http://www.zbpblog.com/blog/%d.html" % id
+            urls.put(url)   
+        sleep(0.01)    
+        start_id = end_id
+
+    print("文章列表页爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    producer = Thread(target=get_detail_url,args=(urls,))
+    producer.setDaemon(True)    # 设置为守护线程
+
+    consumers = []
+    for i in range(10):  
+        name="Thread %d" % (i+1)
+        consumer = Thread(target=get_detail_content,args=(urls,name))
+        consumer.setDaemon(True)    # 设置为守护线程
+        consumers.append(consumer)
+
+
+    producer.start()
+
+    for consumer in consumers:
+        consumer.start()
+
+    urls.join()     # 等待urls队列的任务被执行完才往下执行
+   
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+
+注释的地方就是做了修改的地方。
+
+PS： Queue的join()方法必须配合task_done()方法一起使用！
+
+Queue的join方法的唤醒条件：
+1当队列中所有任务被弹出，队列中元素为0
+2.每个被弹出的任务都执行了task_done()来标记这个任务已被完成
+
+两个条件缺一不可
+
+上面程序过程如下： 
+首先，所有线程开始运行，同时主线程被urls.join()阻塞
+消费者不停消费产品，每消费完一个产品都会执行task_done()标记每个任务已完成
+当消费者消费完所有任务，并且执行完所有任务，urls.join()会被唤醒，同时所有消费者线程会执行到 urls.get()被阻塞。但是由于进程不等待这些守护线程，所以主线程结束了，所有线程都直接结束。
+
+
+上面这种使用Queue的join()方法只适用于生产者生产速度快于消费者消费速度。假如我将page_url_num = 100改为page_url_num = 5
+生产速度从原本的0.01秒100条变为0.01秒5条，这个时候10个消费者线程会马上把队列中所有任务消费完并且每个任务都用task_done标记为已完成的任务，所以urls.join()被唤醒，然后主线程结束，生产者和消费者线程也结束，但是生产者的10000个任务还没有生产完呢！
+
+为了解决这个问题，可以在生产者线程中做一个is_finished的全局变量标记，表示生产者是否生成完毕。如果没有生产完毕，即使消费者完成了现有队列的所有任务，也会重复调用join()
+
+
+# coding=utf-8
+
+from threading import Thread
+from time import sleep,time
+from queue import Queue
+
+urls = Queue(500)
+is_finished = False     ####################
+
+def get_detail_content(urls,name):
+    print("%s开始爬取文章内容" % name)
+    while True:
+        url = urls.get()
+        sleep(0.001)
+        urls.task_done()        # 标记这一次取出来的url任务已经执行完
+        print("%s 文章：%s 爬取结束" % (name,url))
+
+    print("所有文章内容爬取结束")
+
+def get_detail_url(urls):
+    global is_finished      ####################
+
+    print("开始爬取文章列表页")
+    art_id = 10000  # 假设共有10000个文章url
+    page_url_num = 10
+    start_id = 1
+    while start_id<10000:
+        end_id = start_id+page_url_num
+        for id in range(start_id,end_id):
+            url = "http://www.zbpblog.com/blog/%d.html" % id
+            urls.put(url)
+        sleep(0.01)
+        start_id = end_id
+        
+    is_finished=True        ####################
+
+    print("文章列表页爬取结束")
+
+if __name__ == "__main__":
+    st = time()
+    print("主线程负责计时")
+
+    producer = Thread(target=get_detail_url,args=(urls,))
+    producer.setDaemon(True)    # 设置为守护线程
+
+    consumers = []
+    for i in range(10):
+        name="Thread %d" % (i+1)
+        consumer = Thread(target=get_detail_content,args=(urls,name))
+        consumer.setDaemon(True)    # 设置为守护线程
+        consumers.append(consumer)
+
+
+    producer.start()
+
+    for consumer in consumers:
+        consumer.start()
+
+    while not is_finished:      ######################
+        urls.join()     # 等待urls队列的任务被执行完才往下执行
+
+    et = time()
+
+    print("任务结束，耗时：%.2f" % (et-st))
+    
+标记了 #################### 的地方是做出变更的地方
+
+
+下面贴出Queue中 join和task_done 的源码：
+class Queue:
+    def __init__(self, maxsize=0):
+        self.maxsize = maxsize
+        self._init(maxsize)
+        self.mutex = threading.Lock()
+        self.not_empty = threading.Condition(self.mutex)
+        self.not_full = threading.Condition(self.mutex)
+        self.all_tasks_done = threading.Condition(self.mutex)
+        self.unfinished_tasks = 0
+     
+    def task_done(self):
+        with self.all_tasks_done:
+            unfinished = self.unfinished_tasks - 1
+            if unfinished <= 0:
+                if unfinished < 0:
+                    raise ValueError('task_done() called too many times')
+                self.all_tasks_done.notify_all()
+            self.unfinished_tasks = unfinished
+
+    def join(self):
+        with self.all_tasks_done:
+            while self.unfinished_tasks:
+                self.all_tasks_done.wait()
+
+                
+join是通过条件变量实现的。
+当 self.unfinished_tasks 大于0时就会进入阻塞。而 unfinished_tasks 会在调用put() 给队列添加元素时进行+1 操作。在调用 task_done() 时进行-1操作并检测 unfinished_tasks 是否为0 ，如果为0就唤醒join中的条件变量。
+
+======================================================
+
+多线程编程 - 线程同步
+
+什么是线程同步，为什么要线程同步
+
+线程同步是为了解决多线程编程中，由于竞争使用资源或修改变量而造成数据不一致的问题
+
+举一个例子：
+# coding=utf-8
+
+import dis
+
+a=0
+
+def add():
+    global a
+    a+=1
+
+    return a
+
+def desc():
+    global a
+    a-=1
+
+    return a
+
+
+print(dis.dis(add))
+print(dis.dis(desc))
+
+ 10           0 LOAD_GLOBAL              0 (a)
+              2 LOAD_CONST               1 (1)
+              4 INPLACE_ADD
+              6 STORE_GLOBAL             0 (a)
+
+ 12           8 LOAD_GLOBAL              0 (a)
+             10 RETURN_VALUE
+
+ 16           0 LOAD_GLOBAL              0 (a)
+              2 LOAD_CONST               1 (1)
+              4 INPLACE_SUBTRACT
+              6 STORE_GLOBAL             0 (a)
+
+ 18           8 LOAD_GLOBAL              0 (a)
+             10 RETURN_VALUE
+
+
+我们查看一下 add() 和 desc() 这两个方法的字节码。
+
+可以看出 add() 中 a+=1 可以由4行字节码组成：
+1. 将变量a加载到内存
+2. 将常量1加载到内存
+3. 在内存中执行a+1操作
+4. 将内存中的中间值a+1赋值给代码中的变量a
+
+desc()同样也有这4步
+1. 将变量a加载到内存
+2. 将常量1加载到内存
+3. 在内存中执行a-1操作
+4. 将内存中的中间值a-1赋值给代码中的变量a
+
+python在实际运行的时候是一行行字节码运行的。
+如果上面将add()和desc()分为两个线程循环运行，就可能会出现这种情况：
+一开始a=0,add()运行完第3行字节码的时候，时间片用完，内存中的中间值是a+1=1。轮到desc()执行，并且desc()执行完了4行字节码，此时脚本中a=-1。又轮到add()运行，执行第4行字节码，将1赋给脚本变量a,得到a=1
+
+所有 add()和desc()各运行1次，应该a=0才对，实际上a=1或者a=-1。导致数据不一致。
+
+而造成这个问题的根本原因就是：字节码1~4不是一个原子操作。
+
+
+线程同步可以保证 a+=1和a-=1内部的字节码的运行是一个原子操作，从而避免数据被改乱
+
+
+
+
+同步方式1：互斥锁
+互斥锁可以保证锁内的竞争资源同一时刻只能被一个线程使用。一个线程想使用某一竞争资源，就要先获取锁。如果资源已被线程B加了锁，那么线程A想获取锁使用资源的时候就会进入休眠，等待线程B释放锁。
+底层的细节就是，线程A会进入休眠，主动让出CPU给线程B，让线程B执行完锁内的代码然后释放锁，线程A才会被唤醒，并且拿到锁对资源操作。
+如果有多个线程因为等待锁而进入休眠，这些线程会被放到一个等待队列中。先进队列的线程可以先被唤醒而获取锁和资源的使用。
+
+线程加了互斥锁，就必须要释放锁，否则其他线程会一直等待。
+
+
+锁的优点：
+可以实现线程间同步，保证线程安全，资源的有序使用，变量不会被改乱。
+
+锁的缺点：
+1.加锁和释放锁会消耗时间，所以锁会影响程序性能
+2.锁可能会引起死锁
+
+
+例子1：互斥锁的基本使用
+使用互斥锁的经典例子：
+# coding=utf-8
+
+from threading import Thread,Lock
+
+a=0
+lock = Lock()   # 定义一个互斥锁
+
+def add(lock):
+    global a
+
+    for i in range(1000000):
+        lock.acquire()       # 加锁
+        a+=1
+        lock.release()       # 释放锁
+
+def desc(lock):
+    global a
+
+    for i in range(1000000):
+        lock.acquire()      # 加锁
+        a-=1
+        lock.release()      # 释放锁
+
+
+if __name__=="__main__":
+    t1 = Thread(target=add,args=(lock,))
+    t2 = Thread(target=desc,args=(lock,))
+
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+    print(a)
+
+
+PS： 
+1、如果不加锁，得到的a不是0，说明加锁可以保证操作的原子性，保护资源不被改乱
+2、如果将加锁和释放锁放在for循环之外，此时一个线程会等待另一个线程完全执行完for才会能执行，相当于变成单线程，这是错误的使用锁的方式。
+
+
+例子2：模拟死锁的两种情况
+
+a.死锁的第一种情况，锁嵌套（在锁中嵌套的获取同一把锁）
+from threading import Lock
+
+
+class ThreadSafeQueue:
+    def __init__(self):
+        self.queue=[]   # 用列表模拟一个队列，使用锁保证queue是线程安全的
+        self.lock = Lock()  # 定义一个互斥锁
+
+    def size(self):
+        self.lock.acquire()
+        size = len(self.queue)
+        self.lock.release()
+
+    def get(self):
+        item = None
+        self.lock.acquire()
+        if self.size()>0:
+            item = self.queue.pop(0)
+        self.lock.release()
+
+    def put(self,item):
+        self.lock.acquire()
+        self.queue.append(item)
+        self.lock.release()
+
+
+if __name__=="__main__":
+    q = ThreadSafeQueue()
+    q.put(1)
+    q.put(2)
+    print(q.get())      # 发生一直阻塞
+    
+问题其实出在：
+def get(self):
+    item = None
+    self.lock.acquire()
+    if self.size()>0:
+        item = self.queue.pop(0)
+    self.lock.release()
+    
+self.size()中加了锁，在if self.size>0: 外面又加了相同的锁，所以相同的锁嵌套，就会造成里面的锁等待外面的锁释放。
+但是释放锁的代码在内层锁的代码之后，而执行到内层锁的代码时就已经阻塞了，因此永远都不肯执行释放锁的代码。
+结果一直阻塞。
+
+简单的说就是：
+lock1.acquire()
+lock1.acquire()     # 该行发生死锁，一直阻塞
+do_something()
+lock1.release()
+lock1.release()
+
+这种情况肯定会死锁
+
+
+b.死锁的第二种情况，相互等待资源的锁释放。
+假如有线程A,B，资源m,n，锁X,Y 。线程A，B都会用到资源m,n，使用资源m要用锁X保护，使用资源n要用锁Y保护
+A的逻辑要求先操作m再操作n，而且m和n的操作具有原子性
+B的逻辑要求先操作n再操作m，而且m和n的操作具有原子性
+
+# coding=utf-8
+
+from threading import Thread,Lock
+
+lock_X = Lock()
+lock_Y = Lock()
+m = 0
+n = 0
+
+def task1():
+    global m,n,lock_X,lock_Y
+
+    for i in range(100000):
+        lock_X.acquire()
+        m+=1                    # 1
+        print("task1 add m")
+
+        lock_Y.acquire()        # 2
+        n+=1
+        print("task1 add n")
+        lock_Y.release()
+
+        lock_X.release()
+
+
+
+def task2():
+    global m,n,lock_X,lock_Y
+
+    for i in range(100000):
+        lock_Y.acquire()
+        n-=1                    # 3
+        print("task2 desc n")
+
+        lock_X.acquire()        # 4
+        m-=1
+        print("task2 desc m")
+        lock_X.release()
+
+        lock_Y.release()
+
+
+
+
+if __name__=="__main__":
+   t1 = Thread(target=task1)
+   t2 = Thread(target=task2)
+   t1.start()
+   t2.start()
+
+过程： task1运行到#1时间片用完，接着CPU切换到task2，task2运行完#3，现在要运行#4，但是锁X被task1获取所以task2要等待锁X释放。所以CPU切换会task1，从上一次#1的地方继续执行，执行到 #2发现锁Y已经被task2获取，所以等待task1释放锁Y。
+
+结果：task1等待task2释放锁Y,task2等待task1释放锁X。双方相互等待，发生死锁。
+
+
+
+情况a和情况b的区别：a是同一把锁嵌套，锁等待自己这把锁造成死锁；b是两把不同的锁嵌套，造成相互等待造成死锁
+
+
+
+例子3：多线程的有序进行
+# coding=utf-8
+lock1 = Lock()
+lock2 = Lock()
+lock3 = Lock()
+lock2.acquire()
+lock3.acquire()
+
+def task1():
+    while True:
+        lock1.acquire()
+        print("task1")
+        sleep(0.5)
+        lock2.release()
+
+def task2():
+    while True:
+        lock2.acquire()
+        print("task2")
+        sleep(0.5)
+        lock3.release()
+
+def task3():
+    while True:
+        lock3.acquire()
+        print("task3")
+        sleep(0.5)
+        lock1.release()
+
+
+if __name__=="__main__":
+    t1 = Thread(target=task1)
+    t2 = Thread(target=task2)
+    t3 = Thread(target=task3)
+    t1.start()
+    t2.start()
+    t3.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    
+这个例子的有趣之处在于
+1.三个线程并发，但同一时间只有一把锁是处于释放状态，其他两个锁是处于锁定状态。
+2.输出数据时会加锁，输出完之后却会释放另一个线程要获取的锁而不是释放自己的这把锁。这意味着，这个线程执行完之后，只有要获取“上一个线程释放了的锁”的线程能执行，其他线程不能执行（因为这些线程想获取的锁被其他线程给锁住了）。通过之中方式可以指定线程的执行顺序。
+
+上面的线程是没有实际意义的，因为三个线程相当于是串行执行的，相比于单线程不用切换不用加锁和释放锁，这样串行的多线程效率反而比单线程还低些
+
+
+例子4：
+我们的目的是这样的：
+有4个列表list1~4,list1包含初始元素，list2~4是空的。
+我希望对list1中的数据x进行以下运算 (x+1)*2-3 
+
+元素从list1弹出，+1，再放到list2，使用线程1完成 |
+元素从list2弹出，*2，再放入list3，使用线程2完成 |--这三个过程是（并发的）同时发生的
+元素从list3弹出，-3，再放入list4，使用线程3完成 |
+
+下面我们计划一下，哪些过程需要加锁，哪些过程不用加锁
+互斥锁是为了解决资源竞争，所以我们需要对线程共享的资源加锁即可。
+list1只有线程1用到了，list4只有线程3用到了，所以对这两个list的操作不用加锁
+list2会被线程1和线程2两个线程用到，所以线程1,2在操作list2时要加锁
+list3同理，线程2,3操作list3时需要加锁。
+
+list1~3取出来的元素需要进行算数运算，而算术运算是由一个线程单独完成，所以每个元素运算的时候只会被1个线程使用，所以元素进行算数运算的过程无需加锁。
+
+
+# coding=utf-8
+
+from threading import Thread,Lock
+from time import sleep,time
+
+lock1 = Lock()
+lock2 = Lock()
+list2=[]
+list3=[]
+list4=[]
+
+# 将元素从list1取出，进行+1处理，放入list2
+def task1():
+    while len(list1):
+        item = list1.pop()  # 取出元素
+        item+=1
+
+        # 放入list2时要对list2上锁
+        lock1.acquire()
+        list2.append(item)
+        print("task1 append %d" % item)
+        lock1.release()
+
+
+# 将元素从list2取出，进行*2处理，放入list3
+def task2():
+    while True:
+
+        if len(list2):
+            # 从list2取出元素时要对list2上锁
+            lock1.acquire()
+            item = list2.pop()
+            print("task2 pop %d" % item)
+            lock1.release()
+            
+            item=item*2  # 这里不用放到锁内
+            
+            # 将元素放入list3要对list3上锁，而且因为list2和list3是两个不同的资源，所以要用另一个锁来锁住list3
+            lock2.acquire()
+            list3.append(item)
+            print("task2 append %d" % item)
+            lock2.release()
+        else:
+            sleep(0.0001)
+
+# 将元素从list3取出，进行-3处理，放入list4
+def task3():
+    while True:
+        if len(list3):
+            lock2.acquire()
+            item = list3.pop()
+            print("task3 pop %d" % item)
+            lock2.release()
+            item-=3     # 这句不用放到锁内
+            list4.append(item)
+            print("task3 append %d" % item)
+        else:
+            sleep(0.0001)
+
+
+if __name__=="__main__":
+    list1 = list(range(100000))
+    t1 = Thread(target=task1)
+    t2 = Thread(target=task2)
+    t3 = Thread(target=task3)
+    t1.start()
+    t2.start()
+    t3.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    
+在使用互斥锁的时候，多线程中加了锁的那段代码是串行的。其实在写程序的时候，我总是会想整个运行过程哪些过程是可以同时发生的（并发的），哪些过程是串行的，因为可以同时执行的地方就是多线程比单线程提升了效率的地方，而串行的地方其效率和单线程一样的。
+
+其实我们只用知道哪些地方是没有并发的就可以了，知道了哪些地方是没有并发的，那么其他所有地方都是并发的
+
+例如：我想知道 元素A压入list2，已经从list2弹出的元素B压入list3，已经从list3弹出的元素C压入list4 这三个动作是可以同时发生的吗？
+可以。因为从上面加锁的地方知道：元素A压入list2和元素B从list2弹出是不能同时进行的，元素B压入list3和元素C弹出list3不能同时进行。其他操作都可以同时发生。
+
+总结：程序中只需对多个线程共享的资源进行上锁，对独享的资源无需上锁
+
+
+
+RLock 重入锁
+
+重入锁的特点：
+可以允许同一个锁进行嵌套，但是释放锁的次数一定要等于获取锁的次数。
+一个线程内的重入锁可以嵌套而不阻塞，但是线程间使用同一个重入锁就和互斥锁一样会阻塞
+
+例如 将死锁情况a中的Lock换成RLock重入锁，程序就不会死锁
+
+from threading import RLock
+
+
+class ThreadSafeQueue:
+    def __init__(self):
+        self.queue=[]   # 用列表模拟一个队列，使用锁保证queue是线程安全的
+        self.lock = RLock()  # 定义一个互斥锁
+
+    def size(self):
+        self.lock.acquire()
+        size = len(self.queue)
+        self.lock.release()
+
+        return size
+
+    def get(self):
+        item = None
+        self.lock.acquire()
+        if self.size()>0:
+            item = self.queue.pop(0)
+        self.lock.release()
+
+        return item
+
+    def put(self,item):
+        self.lock.acquire()
+        self.queue.append(item)
+        self.lock.release()
+
+
+if __name__=="__main__":
+    q = ThreadSafeQueue()
+    q.put(1)
+    q.put(2)
+    print(q.get())
+    print(q.get())
+    print(q.get()) 
+    
+    
+下面贴出RLock的源码
+class _RLock:
+    def __init__(self):
+        self._block = _allocate_lock()      # 获取一把互斥锁
+        self._owner = None                  # 用于记录RLock调用acquire()时的线程，是一个整数
+        self._count = 0                     # 记录某一个线程调用了几次 RLock.acquire()
+        
+    def acquire(self, blocking=True, timeout=-1):
+        me = get_ident()        # 获取当前线程的唯一标识，是一个整数
+        if self._owner == me:   # 如果是本线程第二次以上的调用 RLock.acquire() 那么只把计数器+1，但是不会调用互斥锁self._block的acquire()；但如果是别的线程第二次以上的调用RLock.acquire() 那么就会再调用一次互斥锁self._block的acquire(),该线程进入休眠等待状态
+            self._count += 1
+            return 1
+        rc = self._block.acquire(blocking, timeout)   # 线程第一次调用 RLock.acquire()会调用互斥锁的 acquire()
+        if rc:          # # 线程第一次调用 RLock.acquire()会进入该条件
+            self._owner = me
+            self._count = 1
+        return rc
+
+    __enter__ = acquire
+
+    def release(self):
+        if self._owner != get_ident():
+            raise RuntimeError("cannot release un-acquired lock")
+        self._count = count = self._count - 1       # 每调用一次RLock.release()就会将计数器-1
+        if not count:       # 只有当调用 RLock.release()的次数等于RLock.acquire()的次数才会真正调用 self._block的release()释放锁。
+            self._owner = None
+            self._block.release()
+    
+总结： RLock是通过互斥锁和计数器实现的
+
+同步方式2：条件变量
+
+首先，条件变量必须要配合互斥锁使用，因为条件变量是一种多线程竞争的共享资源。
+通过条件变量可以实现等待和通知的机制。
+
+最基本的使用方式为：
+cond = Condition()  # 创建一个条件变量
+cond.acquire()      # 给条件变量上锁
+
+cond.wait()         # 等待，会阻塞下面的代码执行，当其他线程调用notify的时候才会被唤醒
+do_something()      
+cond.notify()       # 通知和唤醒其他使用了条件变量cond的线程
+cond.release()
+
+其中：
+cond.acquire()  其实就是对一个互斥锁上锁，相当于 lock.acquire()
+cond.wait()     会干三件事：1.会释放互斥锁，让其他使用了相同条件变量的线程可以拿到锁来运行。2.进入阻塞休眠状态，让出CPU。3.当本线程的wait()被其他线程notify唤醒后，wait()会重新拿到锁。
+cond.notify()    通知其他线程，唤醒其他线程的wait()。
+cond.release()  释放互斥锁
+
+wait()和release()必须在锁内执行。如果不获取锁就直接调用wait()和release()就会报错
+
+
+PS：使用 
+with cond:
+    if my_condition:
+        cond.wait()
+    do_something()
+    cond.notify()
+    
+和 
+cond.acquire()
+if my_condition:
+    cond.wait()
+do_something()
+cond.notify()
+cond.release()
+
+是一样的。
+
+使用with就相当于在代码外面包了一层锁。
+
+
+例子1：控制多线程有序执行
+有两个人A,B进行对话,分别说1~6这几个数字，要求A先说，A说完B才能说，B说完A才能再说
+A:1
+B:2
+A:3
+B:4
+A:5
+B:6
+
+from threading import Condition,Thread
+
+cond = Condition()
+a_say = [1,3,5]
+b_say = [2,4,6]
+
+class A(Thread):
+    def __init__(self,cond,say):
+        super(A,self).__init__(name="A")
+        self.cond = cond
+        self.say = say
+
+    def run(self):
+        self.cond.acquire()
+        for i in range(len(self.say)):
+            print("%s say %d" % (self.name,self.say.pop(0)))
+            self.cond.notify()  # A说完就要通知B，让B开始说
+
+            if len(self.say):
+                self.cond.wait()    # A说完就不能在说，而是等待B说完，等B通知到A，A才能继续说
+
+        self.cond.release()
+
+
+class B(Thread):
+    def __init__(self,cond,say):
+        super(B,self).__init__(name="B")
+        self.cond = cond
+        self.say = say
+
+    def run(self):
+        self.cond.acquire()
+        for i in range(len(self.say)):
+            self.cond.wait()    # 一开始是A先说而不是B先说，所以一开始B是处于等待状态
+            print("%s say %d" % (self.name,self.say.pop(0)))
+            self.cond.notify()  # B说完就要通知A，让A继续说
+
+        self.cond.release()
+
+if __name__=="__main__":
+    a = A(cond,a_say)
+    b = B(cond,b_say)
+
+    b.start()       # 必须让b线程先启动，a后启动，如果a先启动，那么a会在b没有执行wait()的情况下执行notify()，所以这个notify()通知相当于无效。之后a执行wait().b也执行wait()双方都处于等待，于是这个进程就卡住
+    a.start()
+    
+    
+
+这里使用了一个条件变量来实现
+
+
+当然，我们也可以使用多个互斥锁来实现多线程的有序执行，前面互斥锁的例子中已经展示。
+
+
+例子2：用互斥锁，条件变量和列表实现一个线程安全的队列：
+# coding=utf-8
+
+from threading import Thread
+from threading import Lock,Condition
+import random
+
+class ThreadSafeQueue:
+    def __init__(self,max_size=0,blocking=True,timeout=None):  # 默认队列没有限制最大空间
+        self.max_size=max_size
+        self.blocking=blocking  # 默认等待阻塞
+        self.timeout=timeout    # 默认等待时间无限长
+        self.lock = Lock()
+        self.cond = Condition(lock=self.lock)  # 这个条件变量所使用的锁是自定义的互斥锁，而不使用Condition内部定义的重入锁
+        self.queue = []
+
+    def size(self):     # self.queue是线程共享资源，所有关于self.queue的使用都要加锁，包括查和改
+        self.lock.acquire()
+        size = len(self.queue)
+        self.lock.release()
+
+        return size
+
+    def batch_push(self,items):
+        if not isinstance(items,list):
+            items=list(items)
+        for item in items:
+            self.push(item)
+
+    def push(self,item):
+        self.cond.acquire()
+        while self.max_size>0 and len(self.queue)>=self.max_size:
+            if self.blocking:
+                res = self.cond.wait(timeout=self.timeout)    # 如果超过timeout还没被唤醒，则返回False
+                
+                if not res:
+                    self.cond.release()
+                    return False
+            else:
+                self.cond.release()
+                return False
+
+        self.queue.append(item)
+        self.cond.notify()
+        self.cond.release()
+
+
+        return True
+
+    def pop(self):
+        self.cond.acquire()
+        while len(self.queue)<=0:
+            if self.blocking:
+                res=self.cond.wait(timeout=self.timeout)
+                
+                if not res:
+                    self.cond.release()
+                    return False
+            else:
+                self.cond.release()
+                return False
+
+        item = self.queue.pop()
+        self.cond.notify()          # 通知生产者可以继续生产
+        self.cond.release()
+
+        return item
+
+    def get(self,index):
+        self.lock.acquire()
+        try:
+            item = self.queue[index]
+        except:
+            item=None
+        self.lock.release()
+
+        return item
+
+# 生产者
+def produce(q,n):
+    for i in range(100000):
+        q.push(i)
+        print("Thread %d push %d" % (n,i))
+
+def consumer(q,n):
+    count_none = 0  # 如果q.pop()阻塞次数大于10则停止while循环
+    while True:
+        item = q.pop()
+        if item is False:
+            count_none+=1
+        else:
+            count_none=0
+            print("Thread %d pop %d" % (n,item))
+
+        if count_none>=10:
+            break
+
+
+# 测试
+if __name__=="__main__":
+    queue = ThreadSafeQueue(1000)       # 测试阻塞队列，结果是，消费者消费完所有产品后阻塞等待新产品生产，一直处于等待状态
+    # queue = ThreadSafeQueue(1000,timeout=1)       # 测试阻塞队列，结果是，消费者消费完所有产品后阻塞等待新产品生产，阻塞10次后自动跳出循环
+    # queue = ThreadSafeQueue(1000,blocking=False)    # 测试非阻塞队列，结果是，生产者由于多次被阻塞而放弃了很多次生产产品，消费者消费完所有产品后直接结束
+
+    # 创建两个生产者线程，一个消费者线程,使得生产产品的速度比消费产品的速度快，这样消费产品不会等待，而生产产品会等待
+    t1 = Thread(target=produce,args=(queue,1))
+    t2 = Thread(target=produce,args=(queue,2))
+    t3 = Thread(target=consumer,args=(queue,3))
+    t1.start()
+    t2.start()
+    t3.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    
+    
+    
+    
+
+
+下面说一下Condition的底层是怎么实现的：
+1.实例化 Condition 的时候，Condition的__init__会生成一个 RLock 重入锁，这个锁用于保护条件变量对象的使用。我们叫这把锁为 R
+
+2.执行wait()前必须执行cond.acquire()对条件变量上锁，上的锁就是 R；
+  执行wait() 的时候，wait()做了这么几件事：
+  2-1. wait()会生成一个互斥锁，我们把这个互斥锁叫做X，并对X调用acquire()上锁： X.acquire()，之后将锁X放到一个双向队列 Q 中。
+  2-2. wait()释放锁 R，这样其他线程才能获取锁R并执行一些任务代码
+  2-3. wait()在释放 R之后，会再对X上一次锁，X.acquire() ; 由于连续对X上两次锁，所以会发生死锁，这样wait()进入阻塞状态。
+  所以 条件变量的wait() 是通过死锁的方式来实现阻塞等待的功能的！！
+  
+  2-4.wait()的锁X被其他线程的notify()释放后，会重新对R上锁，锁X就再也不会被使用。下一次调用wait()的时候会生成一把新的X锁
+  
+3.其他线程获取到锁R，并执行一些任务代码，之后执行notify()唤醒之前那个线程的wait()
+  notify()做了这么几件事：
+  3-1. 从队列 Q 头部弹出锁 X，释放锁X。通过释放锁X实现唤醒wait()的。之后这个锁X就永远不会被用到了
+  
+  
+总结： Condition的实现用了两把锁：
+__init__()时创建的重入锁R 和 wait()是创建的互斥锁X
+R用于保护条件变量和一些共享变量的线程安全
+X不用于线程安全，而是用于制造死锁达成阻塞效果
+
+R会重复使用，X是一次性使用，每次会生成新的X
+
+
+下面贴出 Condition中__init__,wait()和notify()的源码：
+class Condition:
+    
+
+    def __init__(self, lock=None):
+        if lock is None:
+            lock = RLock()      # 创建一个重入锁 R。如果手动传入 lock 则使用用户传入的lock。
+        self._lock = lock
+
+        self.acquire = lock.acquire
+        self.release = lock.release
+        
+        try:
+            self._release_save = lock._release_save
+        except AttributeError:
+            pass
+        try:
+            self._acquire_restore = lock._acquire_restore
+        except AttributeError:
+            pass
+        try:
+            self._is_owned = lock._is_owned
+        except AttributeError:
+            pass
+        self._waiters = _deque()
+
+    
+
+    def wait(self, timeout=None):
+        if not self._is_owned():
+            raise RuntimeError("cannot wait on un-acquired lock")
+        waiter = _allocate_lock()       #### 互斥锁 X ####
+        waiter.acquire()                #### 对 X 上锁 ####
+        self._waiters.append(waiter)    #### 将 X 添加到队列 Q ####
+        saved_state = self._release_save()      #### 释放锁 R ####
+        gotit = False
+        try:    
+            if timeout is None:
+                waiter.acquire()        #### 对互斥锁 X 第二次上锁，达成死锁，实现了阻塞 ####
+                gotit = True
+            else:
+                if timeout > 0:
+                    gotit = waiter.acquire(True, timeout)
+                else:
+                    gotit = waiter.acquire(False)
+            return gotit
+        finally:
+            self._acquire_restore(saved_state)      #### X被释放后，对R重新上锁 ####
+            if not gotit:
+                try:
+                    self._waiters.remove(waiter)
+                except ValueError:
+                    pass
+
+    
+    def notify(self, n=1):
+        if not self._is_owned():
+            raise RuntimeError("cannot notify on un-acquired lock")
+        all_waiters = self._waiters
+        waiters_to_notify = _deque(_islice(all_waiters, n))
+        if not waiters_to_notify:
+            return
+        for waiter in waiters_to_notify:
+            waiter.release()        #### 释放锁 X ####
+            try:
+                all_waiters.remove(waiter)
+            except ValueError:
+                pass
+
+    
+    
+    
+    
+同步方式3：信号量 semaphore
+信号量是用于控制并发线程数量的锁。
+
+还是以爬虫为例子。你可能有这么个需求：列表页爬到很多的详情页，我想对每个详情页开一个线程来爬。
+但是如果1秒能够爬到30个详情页url，所以0.5秒内能够获取15个详情页url，假设每个详情页url要花0.5秒爬完，那么进程要维持平均15个线程来爬取详情页，才能保持生产者和消费者的速度一直。
+
+如果1秒能爬100个详情页url，进程就要维持平均50个线程来爬详情页内容。
+
+所以，此时开多少个线程取决于1秒能爬几个详情页url，而不是由开发者决定的。
+
+但是我们知道，线程数量不是越多越好，线程数多了，CPU切换线程损耗的时间就多了。
+
+所以，我们希望能够自己控制线程的数量。
+
+例如，某个线程1秒能爬100个详情页url也好1000个url也好，但我希望能维持10个线程来根据详情页url进行爬取，一个线程爬取一个详情页内容。一个线程在爬取完之后，这个线程就关闭(线程执行完会自己关闭，无需手动关闭)，并开启新线程，但始终保持有10个线程在工作。
+
+
+from threading import Semaphore,Thread
+from time import sleep
+from random import uniform
+class GetDetailContent(Thread):
+    def __init__(self,sem,detail_url):
+        super(GetDetailContent,self).__init__()
+        self.sem = sem
+        self.url = detail_url
+
+    def run(self):
+        sleep(uniform(0,1))      # 用sleep模拟爬取，为了展现线程是结束一个就生成一个而不是10个10个生成的，这里设定爬取每个页面的时间是随机的
+        print("%s 成功爬取页面 %s" % (self.name,self.url))
+
+        # 爬取完成后，释放信号量,没释放1次，计数器就会-1；如果计数器从满的状态-1，就会唤醒acquire()
+        self.sem.release()
+
+class GetDetailUrl:
+    def __init__(self,thread_num=10):
+        self.sem = Semaphore(thread_num)    # 定义一个信号量对象，允许并发的线程数为10个
+
+
+    def do_task(self):
+        for page in range(10):     # 假设有10页列表页
+            for id in range(100):   # 每页有100个url
+                self.sem.acquire()      # 信号量执行一次acquire就会在self.sem的内部计数器中加1，当计数器达到允许并发的线程数时就会进入等待状态
+                url = "http://www.zbpblog.com/blog-%d.html" % id
+                t = GetDetailContent(self.sem,url)      # 对每个详情页url创建一个线程来爬取
+                t.start()
+
+            sleep(1)    # 1秒爬取1个列表页
+
+
+if __name__=="__main__":
+    crawler = GetDetailUrl()
+    crawler.do_task()
+    
+    
+结果是：针对一个url会生成一个线程来爬。线程个数维持在10个不变。
+
+下面贴出 信号量的源码 
+
+class Semaphore:
+
+    def __init__(self, value=1):
+        if value < 0:
+            raise ValueError("semaphore initial value must be >= 0")
+        self._cond = Condition(Lock())
+        self._value = value
+
+    def acquire(self, blocking=True, timeout=None):
+        if not blocking and timeout is not None:
+            raise ValueError("can't specify timeout for non-blocking acquire")
+        rc = False
+        endtime = None
+        with self._cond:
+            while self._value == 0:
+                if not blocking:
+                    break
+                if timeout is not None:
+                    if endtime is None:
+                        endtime = _time() + timeout
+                    else:
+                        timeout = endtime - _time()
+                        if timeout <= 0:
+                            break
+                self._cond.wait(timeout)
+            else:
+                self._value -= 1
+                rc = True
+        return rc
+
+
+    def release(self):
+        with self._cond:
+            self._value += 1
+            self._cond.notify()
+            
+            
+信号量是用 条件变量+计数器实现的。
+
+__init__()的_value记录了可继续开启线程的个数
+每执行一次acquire(),计数器_value会-1。但_value为0时，acquire()会调用条件变量的wait进入休眠
+
+当执行release()的时候，计数器_value会+1，并且notify唤醒wait()使得可以继续开启新线程。
+
+
+semaphore 信号量不仅可以控制线程数量，还可以控制如mysql连接，网络连接这样的连接数。
+
+
+============================================================
+
+多线程管理 - 线程池
+
+Q1：首先，为什么需要线程池？
+因为我们希望能够保持一定数量的并发线程处于执行状态，让处于执行状态的线程数不至于太少也不至于太多，提高任务执行效率。
+
+Q2：信号量 semaphore 也可以实现保持一定数量的并发线程，为什么还要用线程池？
+因为线程池可以监控每一个线程和任务的执行状态，可以获取某个任务的返回值，而信号量不行。线程池中的每个线程完成一个任务后不会销毁而是会继续执行下一个任务，达到线程复用的效果，而信号量不行。要知道线程是宝贵的资源，随意的创建和结束线程是对资源的一种浪费，频繁的创建和关闭线程也会降低效率。
+所以，线程池才是多线程的最佳实践方式！
+
+线程池的使用方法：
+
+from concurrent.future import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(max_workers)  # 创建线程池对象，max_workers指定可以同时处于运行状态的线程数
+
+task = executor.submit(fn,args)  # start()一个线程，并让这个线程完成fn这个任务,args是fn任务函数的参数；返回的task是一个Future对象
+
+task.done()     # 判断任务是否完成
+
+task.cancel()   # 取消任务，只有任务还未开始执行才可以取消
+
+task.result()   # 获取任务的结果（返回值），这个方法是阻塞的
+
+
+
+下面分析一下 ThreadPoolExecutor类和Future类 的源码
+
+Future源码：
+class Future(object):
+    """Represents the result of an asynchronous computation."""
+    # 翻译：Future是一个存储着异步任务的执行结果和运行状态的容器；当然Future不只是一个容器，还负责一个任务的结果获取，取消，判断是否完成，异常设置等功能。一个Future对应着一个任务（任务函数）的结果和状态。
+
+    def __init__(self):
+        """Initializes the future. Should not be called by clients."""
+        # 翻译：Future对象不能在客户端脚本实例化，只能在ThreadPoolExecutor这样的python内部代码中实例化
+        
+        self._condition = threading.Condition()     # 创建了一个条件变量
+        self._state = PENDING                       # 任务状态默认是“正在执行”
+        self._result = None                         # 任务结果默认为空，因为任务还没开始执行或者正在执行
+        self._exception = None              
+        self._waiters = []                          
+        self._done_callbacks = []                   
+
+    def _invoke_callbacks(self):
+        for callback in self._done_callbacks:
+            try:
+                callback(self)
+            except Exception:
+                LOGGER.exception('exception calling callback for %r', self)
+
+    # 用于取消执行某一个任务
+    def cancel(self):
+        """Cancel the future if possible.
+
+        Returns True if the future was cancelled, False otherwise. A future
+        cannot be cancelled if it is running or has already completed.
+        """
+        # 翻译： 不能取消一个正在执行或已执行完的任务。只能取消还未执行的任务。什么是未执行的任务？线程池ThreadPoolExecutor限定了能同时处于执行状态的线程数n，但往线程池中添加的任务数m如果超过了n，m个任务中只有n个可以同时执行，那么m-n那部分任务需要等待前面的任务执行完才能开始执行，这些就是还未执行的任务。
+        
+        with self._condition:
+            if self._state in [RUNNING, FINISHED]:
+                return False
+
+            if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+                return True
+
+            self._state = CANCELLED
+            self._condition.notify_all()    # 取消任务的时候，会唤醒 get_result()中条件变量的wait()，目的是为了告诉get_result说：“不必等待已取消的任务的结果了”
+
+        self._invoke_callbacks()
+        return True
+
+    # 判断这个Future任务是否处于“已被取消”状态
+    def cancelled(self):
+        """Return True if the future was cancelled."""
+        with self._condition:
+            return self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]
+
+    # 判断这个Future任务是否处于“正在运行”状态
+    def running(self):
+        """Return True if the future is currently executing."""
+        with self._condition:
+            return self._state == RUNNING
+
+    # 判断这个Future任务是否处于“执行完毕”状态
+    def done(self):
+        """Return True of the future was cancelled or finished executing."""
+        with self._condition:
+            return self._state in [CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED]
+
+    # 获取任务函数的返回值
+    def __get_result(self):
+        if self._exception:
+            raise self._exception
+        else:
+            return self._result
+
+    # 添加任务函数执行后要执行的函数
+    def add_done_callback(self, fn):
+        """Attaches a callable that will be called when the future finishes.
+
+        Args:
+            fn: A callable that will be called with this future as its only
+                argument when the future completes or is cancelled. The callable
+                will always be called by a thread in the same process in which
+                it was added. If the future has already completed or been
+                cancelled then the callable will be called immediately. These
+                callables are called in the order that they were added.
+        """
+        # 翻译：该方法用于添加一个函数，这个函数会在任务函数完成或者被取消的时候执行。函数会被存放到_done_callbacks这个列表中。所以为一个任务函数添加多个这样的函数。这些_done_callbacks中的函数的执行顺序是按照存入列表的顺序执行的。
+        
+        with self._condition:
+            if self._state not in [CANCELLED, CANCELLED_AND_NOTIFIED, FINISHED]:
+                self._done_callbacks.append(fn)
+                return
+        fn(self)
+
+
+    # 获取任务执行的结果，由于使用了_self.condition.wait()方法，所以是个阻塞的方法。
+    def result(self, timeout=None):
+        """Return the result of the call that the future represents.
+
+        Args:
+            timeout: The number of seconds to wait for the result if the future
+                isn't done. If None, then there is no limit on the wait time.
+
+        Returns:
+            The result of the call that the future represents.
+
+        Raises:
+            CancelledError: If the future was cancelled.
+            TimeoutError: If the future didn't finish executing before the given
+                timeout.
+            Exception: If the call raised then that exception will be raised.
+        """
+        # 翻译：获取Future任务函数的返回值。由于要获取任务返回值，所以肯定要等任务执行完才能获取返回值，所以result()方法会阻塞等待Future对象中的任务函数执行完才能被唤醒。
+        
+        with self._condition:
+            if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+                raise CancelledError()      # 如果对已取消的任务获取返回值结果会报错
+            elif self._state == FINISHED:   # 如果对已执行完毕的任务获取结果则无需等待，直接返回结果
+                return self.__get_result()
+
+            self._condition.wait(timeout)   # 如果对正在执行的任务或者还未执行的任务获取结果，则需要等待，等到任务结束了才能获取结果
+
+            # 此时 wait() 被唤醒，但是仍要再判断一次任务的状态，因为这个任务可能是还未执行的任务被取消了，取消任务是也会notify()唤醒wait()
+            if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+                raise CancelledError()
+            elif self._state == FINISHED:
+                return self.__get_result()
+            else:
+                raise TimeoutError()
+
+    # 用于获取任务执行时报的异常
+    def exception(self, timeout=None):
+        """Return the exception raised by the call that the future represents.
+
+        Args:
+            timeout: The number of seconds to wait for the exception if the
+                future isn't done. If None, then there is no limit on the wait
+                time.
+
+        Returns:
+            The exception raised by the call that the future represents or None
+            if the call completed without raising.
+
+        Raises:
+            CancelledError: If the future was cancelled.
+            TimeoutError: If the future didn't finish executing before the given
+                timeout.
+        """
+
+        with self._condition:
+            if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+                raise CancelledError()
+            elif self._state == FINISHED:
+                return self._exception
+
+            self._condition.wait(timeout)
+
+            if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]:
+                raise CancelledError()
+            elif self._state == FINISHED:
+                return self._exception
+            else:
+                raise TimeoutError()
+
+    # 设置任务结果
+    def set_result(self, result):
+        """Sets the return value of work associated with the future.
+
+        Should only be used by Executor implementations and unit tests.
+        """
+        # 这个方法只能在任务执行完毕时在线程池的线程中调用，而不能在主线程中调用
+        
+        with self._condition:
+            self._result = result       # 将任务结果存到对象属性中
+            self._state = FINISHED      # 将任务状态改为结束
+            for waiter in self._waiters:
+                waiter.add_result(self)
+            self._condition.notify_all()    # 唤醒和通知 get_result()中的wait(),说：“任务函数的结果已经拿到了，可以把结果返回给主线程了”
+        self._invoke_callbacks()    # 执行任务函数完成后要执行的函数
+
+    def set_exception(self, exception):
+        """Sets the result of the future as being the given exception.
+
+        Should only be used by Executor implementations and unit tests.
+        """
+        with self._condition:
+            self._exception = exception
+            self._state = FINISHED
+            for waiter in self._waiters:
+                waiter.add_exception(self)
+            self._condition.notify_all()
+        self._invoke_callbacks()
+        
+        
+PS：像cancel,done,add_done_callback,get_result,set_result等方法都是在 with self._condition 下执行的，意味着这些操作都是加锁执行的，所以Future是线程安全的。
+
+总结：
+1.Future对象是用于完成：任务的结果设置，结果获取，取消执行，监控任务状态的一个对象，并且会将任务的状态和结果存储到对象成员变量中。
+2.Future对象中，如何实现在主线程获取在其他线程中异步执行的任务的结果？答：使用条件变量实现，在任务没执行完的时候阻塞主线程，在任务执行完后唤醒主线程并返回结果；当然如果任务已经完成的情况下去获取结果则不会阻塞。
+3.Future不存储任务函数本身，在Future的__init__中并没有成员变量是用来保存任务函数，也没有见到有任务函数传入__init__中。
+4.Future不负责执行任务函数
+
+
+
+
+_WorkItem源码：
+class _WorkItem(object):
+    def __init__(self, future, fn, args, kwargs):       # 接受一个Future对象，fn 任务函数，args 任务函数的采纳数
+        self.future = future    # 任务函数的结果和状态的存储容器
+        self.fn = fn            # 任务函数
+        self.args = args
+        self.kwargs = kwargs
+
+    # 执行任务函数，并将任务的结果保存到future对象中。这个run方法是在 _WorkItem 的 _worker方法中调用的
+    def run(self):
+        if not self.future.set_running_or_notify_cancel():
+            return
+
+        try:
+            result = self.fn(*self.args, **self.kwargs)     # 执行任务函数
+        except BaseException as exc:
+            self.future.set_exception(exc)
+            # Break a reference cycle with the exception 'exc'
+            self = None
+        else:   
+            self.future.set_result(result)                  # 将任务的结果保存到future对象中
+
+# 用于从任务队列中弹出任务容器 _WorkItem 对象，并且执行任务容器的 run() 方法。 该方法是在 ThreadPoolExecutor 的 _adjust_thread_count 方法中调用
+def _worker(executor_reference, work_queue):
+    try:
+        while True:         # 这里是一个死循环，说明线程池的线程也是不停从任务队列取任务执行的
+            work_item = work_queue.get(block=True)
+            if work_item is not None:
+                work_item.run()         # work_item就是 _WorkItem 对象本身，run()作用就是运行任务函数
+                # Delete references to object. See issue16284
+                del work_item           # 任务执行完之后，销毁 任务容器对象
+                continue
+            executor = executor_reference()
+            # Exit if:
+            #   - The interpreter is shutting down OR
+            #   - The executor that owns the worker has been collected OR
+            #   - The executor that owns the worker has been shutdown.
+            if _shutdown or executor is None or executor._shutdown:
+                # Notice other workers
+                work_queue.put(None)
+                return
+            del executor
+    except BaseException:
+        _base.LOGGER.critical('Exception in worker', exc_info=True)
+
+总结： _WorkItem存放着一个任务函数和这个任务对应的Future对象，_WorkItem负责执行任务函数，并将任务函数的结果放到Future中。
+_WrokItem本质是一个容器，可以任务它就是一个任务对象。
+
+
+
+ThreadPoolExecutor 线程池 源码：
+class ThreadPoolExecutor(_base.Executor):
+    def __init__(self, max_workers=None, thread_name_prefix=''):
+        if max_workers is None:
+            max_workers = (os.cpu_count() or 1) * 5     # 默认最大的并发线程是CPU核数的5倍
+        if max_workers <= 0:
+            raise ValueError("max_workers must be greater than 0")
+
+        self._max_workers = max_workers     # 最大并发线程数
+        self._work_queue = queue.Queue()    # 任务队列，用于存放任务容器 _WorkItem
+        self._threads = set()               # 线程池，用于存放正在运行的线程
+        self._shutdown = False              # 标记，用于标记线程池是否已关闭
+        self._shutdown_lock = threading.Lock()  # 互斥锁，用于保证线程添加到 self._threads集合中是线程安全的
+        self._thread_name_prefix = (thread_name_prefix or
+                                    ("ThreadPoolExecutor-%d" % self._counter()))    # 用于生产线程名称的前缀
+
+    # 提交一个任务到线程池中
+    def submit(self, fn, *args, **kwargs):
+        with self._shutdown_lock:
+            if self._shutdown:
+                raise RuntimeError('cannot schedule new futures after shutdown')
+
+            f = _base.Future()      # 生成一个Future对象
+            w = _WorkItem(f, fn, args, kwargs)  # 将任务函数和Future对象都放到 _WorkItem容器中
+
+            self._work_queue.put(w)     # 将 _WorkItem 任务容器放到任务队列中
+            self._adjust_thread_count()     # 为当前任务创建一个线程，并且启动线程运行任务
+            return f
+    submit.__doc__ = _base.Executor.submit.__doc__
+
+
+    # 这个方法很关键
+    def _adjust_thread_count(self):
+        # When the executor gets lost, the weakref callback will wake up
+        # the worker threads.
+        def weakref_cb(_, q=self._work_queue):
+            q.put(None)
+        # TODO(bquinlan): Should avoid creating new threads if there are more
+        # idle threads than items in the work queue.
+        
+        num_threads = len(self._threads)
+        if num_threads < self._max_workers:     # 判断已创建的线程数是否超过限制，如果超过限制则不做任何事情
+            thread_name = '%s_%d' % (self._thread_name_prefix or self,
+                                     num_threads)
+                                     
+            # 这行很关键，创建一个线程，并且，线程的目标函数不是任务函数，而是 _WorkItem中的_worker方法
+            # _worker方法做的事情是：不停的从任务队列 self._work_queue 中取出任务执行
+            # 所以， ThreadPoolExecutor线程池不是为一个任务生成一个线程，而是先生成一定量的线程，让这些线程不停的从任务队列取任务执行，换句话说，这些线程不会被销毁，而是可以复用。
+            t = threading.Thread(name=thread_name, target=_worker,
+                                 args=(weakref.ref(self, weakref_cb),
+                                       self._work_queue))
+            t.daemon = True     # 将线程设为守护线程
+            t.start()           # 运行线程
+            self._threads.add(t)
+            _threads_queues[t] = self._work_queue
+    
+    # 这个方法也很重要：用于关闭一个线程池。他的方法比较奇特：当生产者不再往任务队列生成产品了，就可以调用这个shutdown方法，此时会将_shutdown标志设为True，并且往任务队列中添加一个None，而添加了这个None就是关键。
+    # 因为当生产者生成完毕的时候，消费者不一定消费完毕，而当消费者线程消费完毕所有任务的时候，如果任务队列为空，消费者线程会被队列阻塞。这个时候所有线程不能结束。但是如果我在任务队列最后put一个None，当消费者线程拿到这个None的时候可以做个判断，并跳出while True循环从而结束线程，让线程得到释放。
+    def shutdown(self, wait=True):
+        with self._shutdown_lock:
+            self._shutdown = True
+            self._work_queue.put(None)      # 往任务队列中添加一个None，这是关闭线程的关键
+        if wait:
+            for t in self._threads:
+                t.join()
+    shutdown.__doc__ = _base.Executor.shutdown.__doc_
+    
+PS:shutdown的调用时机：当生产者将所有产品放入任务队列，不再会生产新商品时调用。
+调用这个方法的时候，任务可能还没消费完，但是任务一定已经生产完。
+这个方法用于当所有任务消费完毕后，通知线程池结束所有线程，避免线程处于阻塞状态。
+调用shutdown的时候没有通知线程池结束所有线程，而是任务消费完毕时任务队列中的None元素会通知线程池结束所有线程
+    
+
+
+学习多线程关键不是学怎么用python的多线程函数和类，而是了解其原理和设计模式，这样自己也能设计出比较好的多线程模型。
+
+
+上面了解了线程池的设计模式和原理，接下来我们用线程池来模拟实现一个简单的爬虫：
+
+
+from threading import Semaphore,Thread
+import threading
+from time import sleep
+from concurrent.futures import ThreadPoolExecutor
+
+# 用于获取一页列表页的url
+def get_url(current_page=1,per_rows=10):
+    sleep(0.5)    # 模拟爬取
+    urls = []
+    for i in range(1,per_rows+1):
+        id = (current_page-1)*per_rows+i
+        url = "http://www.zbpblog.com/blog-%d.html" % id
+        urls.append(url)
+
+    print("%s 爬取列表页 %d 成功" % (threading.current_thread().getName(),current_page))
+    return urls
+
+# 用于爬取一个详情页
+def get_detail(url):
+    sleep(0.2)  # 模拟爬取
+    print("%s 爬取链接 %s 成功" % (threading.current_thread().getName(),url))
+
+
+if __name__=="__main__":
+    # 创建一个线程池
+    pool = ThreadPoolExecutor()
+
+    # 先爬取列表页
+    pages = 10
+    results = []
+    for page in range(1,pages+1):
+        future = pool.submit(get_url,page)   # 添加到任务队列中，由线程取出任务并执行任务
+        results.append(future)
+
+    # 获取结果
+    for future in results:
+        result_urls = future.result()   # 阻塞获取结果
+
+        # 获取到url后执行详情页任务
+        for url in result_urls:
+            pool.submit(get_detail,url)  # 由于爬取详情页没有返回值所以这里不用返回future对象
+
+
+结果如下：
+ThreadPoolExecutor-0_0 爬取列表页 1 成功
+ThreadPoolExecutor-0_2 爬取列表页 3 成功
+ThreadPoolExecutor-0_1 爬取列表页 2 成功
+ThreadPoolExecutor-0_3 爬取列表页 4 成功
+ThreadPoolExecutor-0_7 爬取列表页 8 成功
+ThreadPoolExecutor-0_5 爬取列表页 6 成功
+ThreadPoolExecutor-0_9 爬取列表页 10 成功
+ThreadPoolExecutor-0_6 爬取列表页 7 成功
+ThreadPoolExecutor-0_8 爬取列表页 9 成功
+ThreadPoolExecutor-0_4 爬取列表页 5 成功
+ThreadPoolExecutor-0_0 爬取链接 http://www.zbpblog.com/blog-1.html 成功
+ThreadPoolExecutor-0_2 爬取链接 http://www.zbpblog.com/blog-2.html 成功
+ThreadPoolExecutor-0_1 爬取链接 http://www.zbpblog.com/blog-3.html 成功
+ThreadPoolExecutor-0_3 爬取链接 http://www.zbpblog.com/blog-4.html 成功
+ThreadPoolExecutor-0_7 爬取链接 http://www.zbpblog.com/blog-5.html 成功
+ThreadPoolExecutor-0_5 爬取链接 http://www.zbpblog.com/blog-6.html 成功
+ThreadPoolExecutor-0_9 爬取链接 http://www.zbpblog.com/blog-7.html 成功
+ThreadPoolExecutor-0_6 爬取链接 http://www.zbpblog.com/blog-8.html 成功
+
+.......
+
+可以看出，在程序中，我submit()很多很多次任务，但是结果显示，创建的线程只有ThreadPoolExecutor-0_0~9 这10个线程。说明，线程不是执行完之后就销毁然后又生成新线程，而是可以复用线程执行多个任务，让一个线程不停地从任务队列里面取出任务执行。
+
+
+可以使用map方法简化上面的调用：
+if __name__=="__main__":
+    # 创建一个线程池
+    pool = ThreadPoolExecutor()
+
+    # 先爬取列表页
+    pages = 100
+
+    for result in pool.map(get_url,list(range(pages))):
+        # result就是详情页urls
+        for url in result:
+            pool.submit(get_detail,url)
+            
+这样调用和上面的效果是一样的。
+map()方法是线程池的方法，第一参是任务函数，第二参是任务函数的参数，是一个列表，列表有多少个元素就表示要执行多少个任务函数。map()内部会执行一个for循环调用submit()提交和执行任务,然后会对每一个submit()返回的future对象调用result()获取结果。map内部使用了yield生成器
+
+所以 for result in pool.map(get_url,list(range(pages))) 中的 result 直接就是任务函数的返回值，而不是future对象。
+
+下面贴出 map() 的源码：
+    def map(self, fn, *iterables, timeout=None, chunksize=1):
+        if timeout is not None:
+            end_time = timeout + time.monotonic()
+
+        fs = [self.submit(fn, *args) for args in zip(*iterables)]
+
+        def result_iterator():
+            try:
+                # reverse to keep finishing order
+                fs.reverse()
+                while fs:
+                    # Careful not to keep a reference to the popped future
+                    if timeout is None:
+                        yield fs.pop().result()     # 阻塞
+                    else:
+                        yield fs.pop().result(end_time - time.monotonic())
+            finally:
+                for future in fs:
+                    future.cancel()
+        return result_iterator()
+
+
+还可以使用 as_complete() 调用： 
+if __name__=="__main__":
+    # 创建一个线程池
+    pool = ThreadPoolExecutor()
+
+    # 先爬取列表页
+    pages = 100
+
+    futures = [pool.submit(get_url,page) for page in range(pages)]
+    for future in as_completed(futures):
+        urls=future.result()
+        for url in urls:
+            pool.submit(get_detail,url)
+
+和map以及第一种调用方式不同，as_completed()会将已经完成任务的future先返回，所以as_completed()会阻塞直到有某个任务完成了，就将这个future赋给for循环中，而此时future.result()不会阻塞。能进入到for代码块中的future都是已经调用过_set_result()的future，都是已经执行完毕的任务，此时future.result()是无需等待的。
+
+举个例子：我要完成 A B C D E 五个任务，5个任务分别需要5,4,3,2,1秒。我submit的顺序是 A B C D E 
+此时，1s后E的future先得到，for循环了一次，然后进入阻塞。又过了1s后，得到D的future，for有循环了一次。以此类推，完成这个for循环要花5秒
+
+as_completed()会返回已执行完毕的任务的future对象。
+
+
+上面这些调用方法还是有一个小缺陷：
+他只能爬取完所有列表页才能开始爬详情页，如果希望爬完一个列表页后马上将该列表下的详情页任务添加到任务队列，而不是爬完10个列表页才往任务队列添加详情页任务的话，可以在get_url函数内部执行 pool.submit(get_detail)，这才是效率最高的调用方式：
+
+# 用于爬取一个详情页
+def get_detail(url):
+    sleep(0.2)  # 模拟爬取
+    print("%s 爬取链接 %s 成功" % (threading.current_thread().getName(),url))
+
+
+# 用于获取一页列表页的url
+def get_url(pool,current_page=1,per_rows=10):
+    sleep(uniform(0.3,0.6))    # 模拟爬取
+
+    for i in range(1,per_rows+1):
+        id = (current_page-1)*per_rows+i
+        url = "http://www.zbpblog.com/blog-%d.html" % id
+        pool.submit(get_detail,url)
+        # urls.append(url)
+    
+    print("%s 爬取列表页 %d 成功" % (threading.current_thread().getName(),current_page))
+
+
+
+
+
+if __name__=="__main__":
+     # 创建一个线程池
+    pool = ThreadPoolExecutor()
+
+    # 先爬取列表页
+    pages = 100
+    futures=[]
+    for page in range(1,pages+1):
+        future = pool.submit(get_url,pool,page)
+        futures.append(future)
+
+    for future in futures:
+        future.result()         # 此时get_url是没有返回值的，这里获取任务结果的目的是等待所有get_url()任务的完成，否则会由于主线程的结束而导致其他线程没执行完就结束（因为其他线程是以守护线程的形式存在的）
+
+=======================================================
+
+多进程编程
+
+多进程和多线程对比：
+1.由于python有GIL锁，而且是一个进程管理着1把GIL锁，所以多线程无法使用多核，即同一时刻只能一个线程在运行。
+而多进程编程可以使用多核。意味着，多进程可以并行，同一时刻多进程可以使用多个CPU从而同时运行，而多线程不能做到真正的同时运行。
+
+一句话：python中的多线程只能并发不能并行，多进程则可以并行（前提是你的电脑是多核的）
+
+2.由于多线程只能并发不能并行，所以适合多IO操作少CPU操作的任务，例如爬虫，磁盘读写等任务。
+多进程相反，适合少IO操作多CPU操作的任务，例如纯计算的任务。
+原因是IO操作会存在等待，线程可以在等待的时候让出CPU给其他线程工作，以达到让整个程序一直都在干活不闲着。
+但是如果是耗CPU的操作，则几乎不存在等待阻塞的情况，每一个线程不会因为阻塞而让出CPU，而是因为时间片用完而让出CPU。这种情况下，多线程会比单线程更慢，因为多了线程间的切换。
+
+而对于多进程而言，由于可以并行，多个进程可以同时完成多个耗CPU的操作，节省时间。举个例子，我现在想完成两个比较庞大的运算：A和B任务。就是就可以生成两个子进程，一个计算A任务，一个计算B任务。A和B任务是并行的，比并发更快。但是有种理解是错误的：认为多进程可以一起完成任务A的运算，让A运算的时间减半，这是不行的。
+而对于IO操作，当遇到等待的时候，进程会将CPU让出给其他程序的进程，这段期间这个进程还是什么都做不了。而且多进程的切换耗时更多，进程消耗的资源更多（如内存，fork一个进程是要拷贝一份父进程的内存的），因此还不如用多线程。
+
+3.多线程的切换比多进程的切换的损耗要少很多，多进程的雀环更慢。线程是轻量级的，进程是重量级的。
+
+
+PS：在windows下，python多进程的必须在 if __name__=="__main__":下运行，否则会报错。在Linux则不存在这个问题。
+
+
+
+
+
+1.多进程之间不共享数据
+
+例子：
+from multiprocessing import Process
+
+num=10
+def task1:
+    global num
+    num+=5
+    print("子进程1的num：%d" % num)
+    
+def task2:
+    global num
+    num+=10
+    print("子进程2的num：%d" % num)
+    
+p1 = Process(target=task1)
+p2 = Process(target=task2)
+p1.start()      # p1.pid 可以获取其进程id
+p2.start()
+p1.join()
+p2.join()
+print("主进程的num：%d" % num)
+
+结果得到：
+子进程1的num：15
+子进程2的num：20
+主进程的num：10
+
+从这里可以知道三个进程之间的num是不共享的。
+如果是共享的得到应该是 15 25 25
+
+原因详细分析：
+因为主进程创建一个子进程，底层会执行fork()，系统会将主进程完全拷贝一份放在另一个空间，包括拷贝主进程的PCB，内存，数据等。
+所以上面的程序中生成了2个子进程，就会开辟两块空间，并将主进程的内容复制两份分别放在两个空间中。加上主进程自己，就有三块空间。
+三块空间里面各有一个num，这三个num变量互不干扰。所以每个进程自己操作自己的num，不会影响其他两个进程的num
+
+
+
+多进程和多线程的很多接口是一样的，如start()，join()等方法。
+Process也可以像Thread一样被其他类继承。
+
+
+
+2.使用进程池编程
+
+之前说过，进程池和线程池才是进程线程的最佳实践。
+
+# coding=utf-8
+
+from multiprocessing import Pool
+
+def task(num):
+    res = 0
+    for i in range(num):
+        res+=i
+
+    return res
+
+
+if __name__=="__main__":
+    # 创建一个进程池
+    pool = Pool()   # 默认生成和核数相同的进程数
+    task1 = pool.apply_async(task,args=(10000,))    # 相当于线程池中的submit,此时子进程已经在运行
+    task2 = pool.apply_async(task,args=(20000,))
+
+    pool.close()    # 关闭进程池，不让进程池接收新的任务
+    pool.join()     # 等待所有子进程运行完，必须执行pool.close()才能调用join()否则报错
+
+    print(task1.get())  # 获取结果，这个方法可以阻塞父进程直到子进程任务执行完，调用get()的时候无需调用join，除非想一次性获取所有任务的结果
+    print(task2.get())
+    
+    
+
+Pool的源码这里不再贴出，有时间可以查看Pool的源码。
+
+
+可以使用 imap 方法，这个类似于线程池 ThreadPoolExecutor 中的map() 方法：
+
+if __name__=="__main__":
+    # 创建一个进程池
+    pool = Pool()   # 默认生成和核数相同的进程数
+
+    for result in pool.imap(task,[2000000,200000]):
+        print(result)
+        
+结果：
+(过了5秒)
+199999990000000
+19999900000
+
+imap_unordered 方法，和imap类似，但是imap_unordered会先返回先执行完毕的任务的结果，而imap则是等所有任务执行完之后，按传入任务的顺序返回任务的结果。
+
+if __name__=="__main__":
+    # 创建一个进程池
+    pool = Pool()   # 默认生成和核数相同的进程数
+
+    for result in pool.imap_unordered(task,[2000000,200000]):
+        print(result)
+
+结果：
+（过了1秒）
+19999900000
+（过了4秒）
+199999990000000
+
+
+
+除了 multiprocessing.Pool 之外，还可以使用 concurrent.futures.ProcessPoolExecutor 进程池，它和 ThreadPoolExecutor 线程池的方法是一致的
+
+
+
+
+3. 进程间通信
+
+进程间通信的三种方式：队列Queue，管道Pipe和共享内存Manager或者 sharedctypes
+
+
+3-1 共享内存
+
+学过多进程基础的朋友都知道，共享内存是进程间通信方式中最简单也最快的方式。
+
+共享内存的原理：
+多个进程的虚拟内存（就是页）会映射到同一块物理内存，多个进程可以共享这一块物理内存的数据。
+多进程可以通过共享内存来共享数据，但是系统内核不负责多进程对共享内存中数据的修改和访问进行同步。意思是，如果多个进程并发或者并行的修改共享内存中的同一个数据，很可能会出现数据不一致。
+
+multiprocessing 提供了两种创建共享内存的方式 Manager和sharedctypes
+
+Manager效率较低，但支持远程共享内存。
+sharedctypes效率较高，快Manager两个数量级，在多进程访问时与普通内存访问相当
+
+
+例子：
+from multiprocessing import Process
+
+def task1:
+    global num
+    num+=5
+    print("子进程1的num：%d" % num)
+    
+def task2:
+    global num
+    num+=10
+    print("子进程2的num：%d" % num)
+    
+if __name__=="__main__":
+    num = 10
+    p1 = Process(target=task1)
+    p2 = Process(target=task2)
+    p1.start()      # p1.pid 可以获取其进程id
+    p2.start()
+    p1.join()
+    p2.join()
+    print("主进程的num：%d" % num)
+
+结果得到：
+子进程1的num：15
+子进程2的num：20
+主进程的num：10
+
+这个例子告诉我们，多进程不会共享数据。
+
+
+但是如果 我们将变量 num 存放到共享内存中，那么主进程,p1和p2进程就不会各有1份num变量，而是只有唯一的1份num变量存在共享内存中：
+
+# coding=utf-8
+
+from multiprocessing import Manager
+from multiprocessing import Process
+
+def task1(num):
+    num.value+=5
+    print("子进程1的num：%d" % num.value)
+
+def task2(num):
+    num.value+=10
+    print("子进程2的num：%d" % num.value)
+
+if __name__=="__main__":
+    manager = Manager()     # 定义一个共享内存对象
+    num = manager.Value("abc",10)
+    # print(num.value)
+    p1 = Process(target=task1,args=(num,))
+    p2 = Process(target=task2,args=(num,))
+    p1.start()      
+    p2.start()
+    p1.join()
+    p2.join()
+    print("主进程的num：%d" % num.value)
+    
+
+共享内存不保证进程的同步，所以多个进程如果操作同一个共享内存的同一个资源或者变量时要加锁：
+
+# coding=utf-8
+
+from multiprocessing import Manager
+from multiprocessing import Process
+
+def task1(num,lock):
+    for i in range(10000):
+        lock.acquire()
+        num.value+=1
+        lock.release()
+
+def task2(num,lock):
+    for i in range(10000):
+        lock.acquire()
+        num.value-=1
+        lock.release()
+
+if __name__=="__main__":
+    manager = Manager()     # 定义一个共享内存对象
+    num = manager.Value("abc",0)
+    lock = manager.Lock()   # 获取锁
+    p1 = Process(target=task1,args=(num,lock))
+    p2 = Process(target=task2,args=(num,lock))
+    p1.start()      
+    p2.start()
+    p1.join()
+    p2.join()
+    print("主进程的num：%d" % num.value)
+    
+
+最后得到的num为0
+
+PS：这里加的锁必须是 Manager 共享对象中实例化的锁，而不能是 Thread 模块中的锁，原因很简单，Thread模块的锁是一个共享变量，但是多进程是不共享变量的，所以如果使用Thread中的锁，这个锁会在所有子进程中都复制一份，那么这个锁就不是1把锁而是3把锁了，就起不到保护进程安全的作用。
+从Manager实例化的锁是存放在共享内存，主进程,p1,p2进程共享1把锁。
+
+
+可以这么理解： 
+从Manager对象中创建出来的变量，锁，条件变量，事件对象，信号量，队列都是放在共享内存中的。
+多进程编程只能使用共享内存中的锁，条件变量和队列等。
+
+
+
+3-2 队列Queue
+
+# coding=utf-8
+
+from multiprocessing import Manager
+from multiprocessing import Process,Queue
+
+def task1(queue):
+    queue.put("a")
+    print("queue put a")
+
+def task2(queue):
+    res = queue.get()
+    print("queue get %s" % res)
+
+if __name__=="__main__":
+    queue = Queue()     # 或者使用 manager = Manager(); queue=manager.Queue()这个Queue
+    p1 = Process(target=task1,args=(queue,))
+    p2 = Process(target=task2,args=(queue,))
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+    
+PS：
+1. 多进程使用队列Queue进行通信的时候，不能使用 from queue import Queue 中的Queue（否则会报错），只能使用 from multiprocessing import Queue 中的Queue 或者是 Manager 中的Queue
+
+2.如果使用进程池 multiprocessing.Pool 创建的进程要使用Queue通信，则只能使用 Manager 中的Queue
+
+Queue是进程安全的，里面加了锁，所以不用担心队列被多个进程竞争使用时被改乱。
+
+
+
+
+3-3 Pipe管道
+
+pipe只能用于两个进程间的通信。它有点像socket，会在两个进程之间建立一个连接，连接的两端会打开两个口，类似于端口。数据的通信和交换通过这个连接进行。
+
+和queue不同的是，queue是可以让多个进程进行通信，而pipe只能用于两个进程之间通信。
+queue的性能低，因为里面加了锁；pipe没有加锁，而是使用了类似socket这样的技术在进程间建立了一个连接。
+
+# coding=utf-8
+
+from multiprocessing import Manager
+from multiprocessing import Process,Pipe
+from time import sleep
+
+def task1(conn):
+    res = conn.recv()   # 会阻塞进程,直到接收到消息
+    print("task1 recv ",res)
+    conn.send("Got it")
+
+def task2(conn):
+    # sleep(5)
+    conn.send("abc")
+    print("task2 send abc")
+
+    res = conn.recv()
+    print(res)
+
+if __name__=="__main__":
+    # queue = Queue()
+    conn1,conn2 = Pipe()    # Pipe()返回两个对象,这两个对象有点像套接字，两个对象都可以进行消息的发送和接收
+    p1 = Process(target=task1,args=(conn1,))
+    p2 = Process(target=task2,args=(conn2,))
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+    
+    
+    
+结果：
+task2 send abc
+task1 recv  abc
+Got it

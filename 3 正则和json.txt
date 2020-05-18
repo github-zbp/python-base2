@@ -1,0 +1,159 @@
+正则基础在这里不再概述，这里主要介绍python中操作正则的函数
+
+关于贪婪匹配
+a="python"
+r=re.findall('[a-z]{3,6}',a)
+
+# 结果匹配到的是python而不是pyt,就是因为贪婪匹配尽可能匹配多的内容。
+
+使用非贪婪匹配，只需在后面加?即可
+a="python"
+r=re.findall('[a-z]{3,6}?',a)
+
+
+
+A. re.findall(pattern,string,flags=0)  
+匹配所有，返回数组，数组是所有匹配到的内容。
+第三参是匹配模式
+python中6个匹配模式如下：
+re.I    #忽略大小写
+re.S    #让.也匹配\n换行符 相当于re.DOTALL
+re.L    #使用本地字符集
+re.X    #略
+re.U    #根据Unicode字符集解析字符
+re.M    #使^和$允许多行匹配
+如：import re
+str1="""<abc><DEF>
+<ABC><22>
+<Abc>"""
+# r = re.findall(r"^<abc>",str1,re.I)
+r = re.findall(r"^<abc>",str1,re.I|re.M)
+print(r)
+常用的就只有前两个
+
+如果要使用多个匹配模式，可以使用|隔开如
+re.findall(pattern,string,flags=re.I|re.S)
+
+如果在findall中使用()进行分组匹配，则返回的列表只有分组匹配的内容，没有整体匹配的内容。
+如果想findall也匹配到整体的内容，可以在整体的外面包一层()。
+如果匹配到的整体有多个，那么返回的格式是列表中包着元组：
+例如：
+str1="""<abc><DEF>
+<ABC><22>
+<Abc>"""
+
+r = re.findall(r"(<(.*?)>)",str1)
+print(r)    #[('<abc>', 'abc'), ('<DEF>', 'DEF'), ('<ABC>', 'ABC'), ('<22>', '22'), ('<Abc>', 'Abc')]
+
+
+B. re.sub(pattern,repl,string,count=0,flags=0)
+正则替换;该方法类似于str.replace()，但是后者无法使用正则
+
+sub用法1：使用分组替换
+str1="""<abc><DEF>
+<ABC><22></22></ABC>
+<Abc>"""
+
+# 我要将所有标签换成在标签内加一个def字符
+str2 = re.sub(r"<(.*?)>",r"<\1def>",str1)
+print(str2)
+
+# 使用()配合\\1即可，如果没有r就要两个\
+
+
+sub用法2：第二参传函数
+例1
+str1="""<abc><DEF>
+<ABC><22></22></ABC>
+<Abc>"""
+
+def convert(val):
+    print(val)      # val是一个match对象
+    matched = val.group()   # val.group()是匹配到的值
+    print(matched)
+    return "||"+matched+"||"
+
+str2 = re.sub(r"<(.*?)>",convert,str1,flags=re.DOLL)
+print(str2)
+
+如果在sub第二参传入函数，就会将匹配到的所有项一个个的传到该函数中。
+这样我们可以在函数中编写逻辑来做功能更强大的替换。
+上面的例子中，由于使用了()进行分组匹配，所以，可以使用val.group(1)获取分组匹配的内容
+
+PS convert只能返回字符串，不能返回数字。
+
+例2
+要求将str1字符串中大于6的数字替换成9，小于6的则替换为+1处理，使用正则替换来做。
+
+str1="A8C3721D86"
+
+def convert(val):
+    val = val.group()
+    if int(val)>6:
+        return "9"
+    else:
+        return str(int(val)+1)
+
+str2 = re.sub(r"\d",convert,str1)
+print(str2)
+
+
+C. re.match(pattern,string,flags=0)
+match尝试从字符串的开头来寻找pattern匹配的字符串，返回的是match对象
+
+D. re.search(pattern,string,flags=0)
+search尝试在整个字符串中寻找pattern匹配的字符串，只匹配1次，返回的是match对象，如果没有匹配到则返回None。要使用group()方法才可以拿到匹配的内容。
+r = re.search(pattern,string,flags=0)
+print(r.group())    # 返回匹配到的内容
+print(r.span())     # 返回匹配到的内容的开始位置和结束位置
+
+关于search的分组匹配：
+使用()配合search方法可以实现分组匹配。分组匹配得到的内容可以使用group()方法获取。例子如下：
+
+s="""
+<img src="/uploads/full/d1387da238cbc271ba4abd34d3befcc78a1897c2.jpg" class="lazy" alt="日税务省高级官员：安住淳和卡梅伦明确视为，欧洲地区应更加尽力化解债务巨变" title="日税务省高级官员：安住淳和卡梅伦明确视为，欧洲地区应更加尽力化解债务巨变">
+"""
+
+r = re.search(r"<img src=[\'\"](.*?)[\'\"] class=[\'\"](.*?)[\'\"] alt=[\'\"](.*?)[\'\"] title=[\'\"](.*?)[\'\"] ?/?>",s,re.I)
+print(r.group())
+print(r.group(1))   # src
+print(r.group(2))   # class
+print(r.group(3))   # alt
+print(r.group(4))   # title
+print(r.group(0,2,4))   # 返回一个元组
+print(r.groups())   # 返回所有的子分组匹配，不包含整体匹配，相当于print(r.group(1,2,3,4))
+
+# group()或者group(0)直接返回的是整体匹配到的内容
+# group(1)返回的是第一个()匹配到的内容，以此类推
+
+
+search分组功能很强大，但search的缺点是只能匹配1次。
+findall分组的缺点是无法获取最外层的整体匹配，但这个缺点可以通过在整体外面包一层()解决。
+
+
+===========================================
+JSON的格式
+{"name":"qiyue","age":18}
+键和字符串类型的值必须用双引号包住，不能用单引号；数字的值可以不同引号包住
+
+JSON操作
+
+json.loads(string)  # json字符串转为字典;无论中文是不是\uxxx的形式都能转为字典成功
+json.dumps(dict)    # 字典转为json字符串，如果使用ensure_ascii=False,就不会将中文转为\uxxx
+
+json.load(fp)   # 解析json文件为字典，常配合with使用
+json.dump(dict,fp)  # 将字典存到json文件，常配合with使用
+
+例如：
+import json
+
+dict1 = {
+    "name":"小明",
+    "age":18
+}
+
+with open("1.json","w") as f:
+    json.dump(dict1,f)
+
+with open("1.json","r") as f:
+    print(json.load(f))

@@ -1,0 +1,512 @@
+编写一个枚举类，枚举类就是用来放分类的，例如我们定义一个字典：
+t = {"0":普通,"1":"黄钻","2":"绿钻","3":"黑钻"}
+这就是用字典模拟出来的一个枚举对象。
+
+但是这样定义枚举有两个缺点：
+1.不能防止可变
+2.不能防止相同值
+
+一般而言，我们存到数据库中的是0~3，但是现实给用户看的是里面的中文内容。
+
+下面我们写一个枚举类：
+
+from enum import Enum
+
+class VIP(Enum):
+    YELLOW=1
+    GREEN=2
+    BLACK=3
+    RED=4
+    
+# 这是一个普通的类，目前只有静态属性常量，但是有点不普通
+print(VIP.YELLOW)   # 得到VIP.YELLOW 而不是 1；这是他的神奇之处。
+
+在python中是没有常量的，即使将其名称大写，它也还是个变量。
+但是如果使用VIP这个枚举类，并且将变量大写，他就会变成“常量”
+VIP.YELLOW=1    # 更改常量，就会报错
+
+# 获取枚举类中常量的值和标签名
+print(VIP.GREEN)        # VIP.GREEN  返回的是枚举类型
+print(VIP.GREEN.name)   # GREEN 字符串类型 枚举类的名称
+print(VIP.GREEN.value)  # 2 枚举类的值
+print(VIP['GREEN'])     # VIP.GREEN 返回的是枚举类型
+print(VIP(1))           # 得到VIP.YELLOW 根据值获取枚举类型
+
+# 枚举类可以遍历，遍历出来的是枚举类型而不是枚举的值
+for i in VIP:
+    print(i)
+    print(i.value)
+    
+# 枚举类型可以进行等值比较，但是不能进行大于小于比较
+print(VIP.GREEN==2)     # False
+print(VIP.GREEN==VIP.BLACK) # False
+print(VIP.GREEN>VIP.BLACK)  # 直接报错
+print(VIP.GREEN is VIP.GREEN)   # True
+
+# 现在再创建一个枚举类
+class VIP1(Enum):
+    YELLOW=1
+    
+print(VIP.YELLOW==VIP1.YELLOW)  # False
+
+
+# 再创建一个枚举类
+class VIP2(Enum):
+    YELLOW=1
+    # YELLOW=2    # 在枚举类中起相同名称的常量会报错
+    GREEN=1
+    BLACK=3
+    RED=4
+    
+print(VIP2.GREEN)    # 得到VIP.YELLOW;说明如果有两个枚举类型的枚举名称不同，取值相同，则python视作为是同一个枚举类型,VIP.GREEN就相当于是VIP.YELLOW的别名。
+
+for v in VIP2:
+    print(v)    # 不会打印VIP.GREEN
+
+for v in VIP2.__members__.items():
+    print(v)    # 会打印VIP.GREEN
+    
+
+如果是继承IntEnum而不是Enum类，那么枚举类型的值只能是int类型的值
+
+使用unique限定，则枚举类型的值不能相同
+from enum import Enum,unique
+
+@unique
+class VIP2(Enum):
+    YELLOW=1
+    GREEN=1     # 报错，枚举值不能相同
+    BLACK=3
+    RED=4
+    
+
+===============================================
+
+Python函数式编程之闭包：
+
+在python中，函数是可以实例化的。python中，一切皆对象。
+
+闭包：
+闭包=函数+环境变量
+
+def curve_pre():
+    a=25
+    def curve(x):    #在函数中定义函数
+        y=a*x*x
+        return y
+        
+    return curve
+    
+f=curve_pre()
+f(2)    # 得到100
+
+a=10
+f(2)    # 还是100
+
+所以curve一旦被定义了会默认使用起环境变量a=25,就在外部环境中a改成了10，他依旧使用环境变量a=25
+
+print(f.__closure__)    # 返回一个对象，这样就表明是一个闭包。如果报错说__closure__属性不存在或者__closure__为None，那么说明f不是一个闭包。
+
+print(f.__closure__[0].cell_contents)   # 可以查看环境变量的内容，在这里显示25
+
+
+
+a=25
+def curve_pre():
+    def curve(x):
+        y=a*x*x
+        return y
+        
+    return curve
+    
+此时就不是一个闭包了，a=25就不是一个环境变量而是一个全局变量。由于curve()缺少了环境变量a,所以curve_pre就不是一个闭包
+
+f=curve_pre()
+f(2)    # 得到100
+
+
+闭包的意义：保留了函数调用时的环境，使得函数内的变量不受外部变量的影响，也就是可以记忆环境变量的变化。
+
+环境变量是可以通过在外层函数传参而改变的：
+def outer(x):   # x就是inner函数的环境变量
+    def inner():
+        print(x)
+    return inner
+     
+print1 = outer(1)
+print2 = outer(2)
+print1()    # 1
+print2()    # 2
+
+如果内部函数定义了局部变量覆盖了环境变量，那么也不能算是一个闭包：
+def f1():
+    a=10
+    def f2():
+        a=20    # 定义了局部变量a覆盖了环境变量a，这导致f1也不是一个闭包。除非在f2一开始用nonlocal声明a为非局部变量
+        
+    return f2       #这里要将f2返回出来，不然也不算一个闭包
+    
+f = f1()
+print(f.__closure__)    # None 
+
+总结：闭包要满足：1.嵌套函数； 2.要有环境变量； 3.外层函数要return内层函数；
+
+用闭包解决问题：
+有一个旅行者，我要记录它走了多少路程。
+例如：开始位置x=0
+第一次走了3步，要返回res=3
+第一次走了5步，要返回res=8
+第一次走了6步，要返回res=14
+
+请分别用非闭包和闭包解决该问题：
+
+用普通函数解决：
+res = 0
+
+def walk(step):
+    global res   #声明是全局变量,这样才可以在函数内部影响全局变量
+    res += step
+    print(res)
+    return res
+    
+walk(10)
+walk(1)
+walk(5)
+walk(8)
+
+错误写法：
+res=0
+def walk(step):
+    new_pos=res+step
+    res = new_pos   # 待会调用的时候，如果不注释这条会报错，注释就不抱错
+    return res
+    
+walk(10)        
+
+我们知道，按照python函数的特性，如果函数中找不到一个变量，就会往上一层去找，所以如果只有new_pos=res+step这一句是没有错的。
+但是定义函数时，如果函数中一个变量在=左边，python会认为该变量是一个局部变量，就不会往上一层去找全局变量，然后调用walk时，执行到new_pos=res+step，由于找不到res局部变量，有不会往上找全局变量，就会报错。
+
+但是如果这个变量时字典，列表，元组这样的序列就不一样了：
+dict1 = {
+    "name":"zbp",
+    "age":18
+}
+
+def changeDict(key,val):
+    dict1[key]=val
+
+    return dict1
+
+print(changeDict("sex","male"))
+
+这个时候不使用global关键字，也能在changeDict()中改变dict1
+
+用面向对象解决
+class Traveler:
+    def __init__(self):
+        self.res=0    # res用于记录共走了多少步,res不设为类变量，因为每个旅行者走了多少步都不同
+        
+    def walk(self,step)
+        self.res += step
+        print(self.res)
+        return self.res
+        
+t1 = Traveler()
+t1.walk(10)
+t1.walk(1)
+t1.walk(5)
+t1.walk(8)
+
+
+使用闭包解决：
+res=0
+
+def traveler(res):
+    def walk(step):
+        nonlocal res
+        new_pos = res + step
+        res = new_pos
+        return res
+        
+    return walk 
+    
+walk = traveler(res)
+print(walk(10))
+print(walk(1))
+print(walk(5))
+print(walk(8))
+print(res)  # 0 说明没有改变全局变量res的值
+print(walk.__closure__)    # 不为none，这是因为使用了nonlocal声明了res
+
+PS : 这里nonlocal声明res为非局部变量，否则，会报错说res是局部变量（因为有res = new_pos这句，所以python认为res是局部变量）。
+
+从上面这个例子知道闭包是有保留环境的功能，会记忆环境变量res的值。这有点像PHP中的static关键字声明的静态变量，静态变量也有记忆变量值的功能。
+
+使用闭包相比与使用global的好处时，闭包不会影响全局变量的值，有很好的隔绝性，而global会改变全局变量的值，过多的使用global会造成混乱。
+
+================================
+Python函数式编程之匿名函数lambda：
+
+匿名函数就是没有函数名的函数。在python中，要定义一个匿名函数要是用lambda关键字。
+
+lambda 参数: 表达式
+
+lambda中的表达式只能是一些简单的表达式。
+
+匿名函数需要赋值给一个变量来调用
+
+f=lambda x,y:x+y
+print(f(1,2))
+
+lambda的函数体部分只能是表达式，所以在lambda中进行赋值操作是不可行的：
+f=lambda x,y: a=x+y     # 报错
+
+============
+
+三元表达式
+如： 
+z=x if x>y else y
+
+============
+map()       # 这是一个类不是函数
+
+map() 接受一个函数和一个或多个序列
+
+举个例子：
+list_x = [1,2,3,4,5,6,7,8]
+def square(x):
+    return x*x
+    
+计算list_x的平方
+
+可以使用列表推导式：
+list_y = [square(x) for x in list_x]
+
+也可以使用map：
+list_y = list(map(square,list_x))   # 返回一个可迭代对象map对象，可转为list
+
+
+结合map和lambda
+list_y = list(map(lambda x:x*x,list_x))   #变简洁了很多
+
+当然也可以由多个参数 
+list_x = [1,2,3,4,5,6,7,8]
+list_y = [7,3,4,4,3,5,1,9]
+list_z = list(map(lambda x,y:x*x+y,list_x,list_y))
+
+如果list_x和list_y的元素个数不同，不会报错，但是返回的结果中的元素个数会比较少。
+
+=====================
+reduce()    # 是一个函数，第一参传一个函数，第二参传一个序列
+
+例子：
+from functools import reduce
+
+list_x = [1,2,3,4,5,6,7,8]
+res = reduce(lambda x,y:x+y,list_x)  # 36
+
+reduce中传入的第一参函数必须有两个参数，她会将list_x中的前两个元素做lambda中的运算，之后会将上一次运算的结果传入参数x，将list_x下一个元素作为参数y再做一次运算。
+
+所以整个过程就是：
+(1+2)+3+4+5+6+7+8
+
+reduce可以传第三参作为初始值
+res = reduce(lambda x,y:x+y,list_x,10)      # 46 
+=======================
+
+filter # 过滤 
+
+list_x = [1,0,1,0,0,1]
+res = list(filter(lambda x:x==1,list_x))
+
+filter的特点是lambda表达式必须返回True和False，他会将返回True的元素保留下来返回给res
+
+========================
+
+装饰器
+
+这里先不直接给出装饰器的定义，而是先举几个例子来介绍装饰器的应用场景。
+
+首先有一个函数
+def f1():
+    print("This is f1")
+    
+现在老板要该需求，要求在f1最开始打印出调用时间。
+
+我们知道编程里面有一个开闭原则，对修改关闭，对扩展打开。
+也就是说，我们不能够直接去修改f1()这个函数。
+就算这里可以修改f1(),实际开发中如果有100个函数都要添加打印时间的功能，我们就真的无法一个个修改。
+
+此时我们可以写一个函数对f1进行包装，在不改动f1内部的情况下给f1添加功能：
+
+import time
+
+def f1():
+    print("This is f1")
+
+def print_time(func):
+    tp = time.localtime()
+    print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+    func()
+    
+print_time(f1)  # 实现了打印时间的新功能和f1()原有的功能
+
+但是上面有一个问题，打印时间应该是f1()内部的功能，是属于f1函数的特性。这样和下面的代码没什么区别：
+
+tp = time.localtime()
+print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+f1()
+
+所以下面升级一下：
+
+import time
+
+def f1():
+    print("This is f1")
+
+def decorator(func):
+    def wrapper():
+        tp = time.localtime()
+        print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+        func()
+    return wrapper
+
+new_f1 = decorator(f1)
+new_f1()
+
+这里我们使用一个闭包来定义装饰器。func就是环境变量。
+可以理解成decorator函数是一个装饰器，wrapper函数是装饰器的装饰功能，可以将f1函数进行改造升级。最后decorator函数会返回升级改造后的新f1
+
+但是现在还是没有解决之前的问题，打印时间不是f1的功能，而是新函数 new_f1 的功能。
+我们希望在不修改f1情况下，调用f1，就能让f1有打印时间的功能。
+
+我们可以使用一个语法糖来实现这个要求：
+import time
+
+def decorator(func):
+    def wrapper():
+        tp = time.localtime()
+        print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+        func()
+    return wrapper
+    
+@decorator
+def f1():
+    print("This is f1")
+    
+f1()    # 打印时间 + 旧功能
+
+上面使用 @装饰器名 来声明一下f1这个函数，这样就能直接往f1函数注入装饰器中定义的新功能。
+
+从上面可以知道，装饰器本质是一个闭包。
+@这个语法糖是装饰器的核心。
+
+上面如果希望把打印时间放在最后只需将wrapper改为：
+def decorator(func):
+    def wrapper():
+        func()
+        tp = time.localtime()
+        print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+    return wrapper
+即可
+
+
+
+
+假如f1是有1个参数要传入的，而且现在有一个f2，f2有2个，参数，还有f3要传入关键字参数，此时可以在wrapper中传入*args和**kw
+
+import time
+
+def decorator(func):
+    def wrapper(*args,**kw):
+        tp = time.localtime()
+        print(time.strftime("%Y-%m-%d %H:%M:%S",tp))
+        func(*args,**kw)
+    return wrapper
+    
+@decorator
+def f1(name):
+    print("This is "+name)
+
+@decorator
+def f2(name1,name2):
+    print("This is "+name1)
+    print("This is "+name2)
+    
+@decorator
+def f3(name1,name2,name3):
+    print("This is "+name1)
+    print("This is "+name2)
+    print("This is "+name3)
+    
+f3("z","b",name3="p")
+
+此时才是装饰器的完整形态，装饰器应该适用不同参数的函数才对。
+
+
+总结：
+装饰器是一个闭包。
+使用 @装饰器名 声明一个函数
+装饰器的应用场景就是扩展函数功能
+f1能够添加不只一个装饰器，可以使用多个@（换行）添加多个装饰器
+
+==================================
+一些python的小技巧：
+
+a.使用字典模拟switch和case
+
+我们知道python中是没有switch和case的。下面我们使用字典模拟：
+这是php中的switch和case
+
+$a=0
+switch($a){
+    case 1:$day="周一";break;
+    case 2:$day="周二";break;    
+    case 3:$day="周三";break;
+    case 4:$day="周四";break;
+    case 5:$day="周五";break;
+    case 6:$day="周六";break;
+    case 0:$day="周日";break;
+   default:$day="周一";
+}
+echo $day;
+
+使用python字典：
+a=0
+dict1={
+    1:"周一",
+    2:"周二",
+    3:"周三",
+    4:"周四",
+    5:"周五",
+    6:"周六",
+    0:"周日"
+}
+print(dict1.get(a,"周一))     #使用字典的get方法是为了防止a是0~6之外的值导致报错，相当于设置默认值default。
+
+但是case中的内容还可以是多行代码，此时python字典中可以把值存为函数，在函数中编写多行代码。
+
+例如 
+def a():
+    print("a")
+    
+def b():
+    print("b")
+    
+def c():
+    print("c")
+    
+def default():
+    print("Unkown")
+    
+k = 0
+dict1={
+    0:a,
+    1:b,
+    2:c
+}
+dict1.get(k,default)()  # 调用
+
+=====================
+在python中，None比较特殊，它不等于空字符串，空列表，0，False，无论在类型还是值上来说都不等于。
+

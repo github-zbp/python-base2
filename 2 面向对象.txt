@@ -1,0 +1,674 @@
+构建一个类
+
+class Student():    # 这里的括号有没有都可以，如果要继承就必须有
+    # 定义属性
+    name = ""
+    age = 0
+    
+    # 构造函数
+    def __init__(self,name,age):
+        self.name=name
+        self.age = age
+    
+    # 定义方法
+    def print_file(self):   # 定义实例方法时必须加上self参数
+        print(self.name)
+        
+这是最简单的一个类
+
+实例化一个类
+student = Student()     # 无需用new
+student.print_file()    # 调用方法
+
+
+构造函数只能返回None，不能返回其他东西，否则会报错。
+
+有一个比较神奇的地方
+print(student.__dict__)     # __dict__属性会记录student对象的所有实例属性
+
+如果我们在构造函数不做任何事情，student.__dict__是一个空字典，因为name和age属性没有被赋值，而在构造函数外定义的name=""和age=0这个是属于类的属性，不是实例属性，所以student.__dict__是一个空字典。
+
+当然类也有__dict__属性可以查看该类的所有类属性
+print(Student.__dict__)
+
+self代表的是实例，而不是类。
+
+接下来是重点：
+实例变量和类变量（静态变量）
+实例方法和类方法和静态方法
+
+# coding=utf-8
+
+class Student():
+    name=""     # 这4个是类变量
+    age=0
+    level="primary"
+    sum=0
+
+    def __init__(self,name="",age=0):       # 构造方法，本质也是一个实例方法
+        if name or age:
+            self.name=name      # 这两个是实例变量，上面的类变量name和这里的实例变量self.name是完全独立的。
+            self.age=age
+            # self.__class__.sum += 1
+            self.__class__.plus_sum()
+            
+        print("This student's level is "+self.__class__.level)  # 在实例方法中调用类变量
+        print("The number of students is "+str(self.__class__.sum))  # 在实例方法中调用类变量
+        
+    def do_homework(self):      # 实例方法
+        print("Doing homework")
+        
+    @classmethod            #类方法的作用是操作类变量
+    def plus_sum(cls):      #类方法，cls代表Student这个类
+        cls.sum += 1
+        
+    @staticmethod
+    def add(x,y):           #静态变量
+        print(x+y)
+        print(Student.name) # 调用类变量
+        print("This is a static function")
+
+stu = Student("zbp",6)
+print(stu.name)     # 在类外面调用实例变量，得到zbp
+print(Student.name) # 在类外面调用类变量，得到空字符
+# 这说明类变量name和实例变量name是独立的，放在不同内存空间的。
+
+stu2= Student()
+print(stu2.name,stu2.age)   # 调用实例变量，得到的值却是类变量的name和age的值：空字符和0
+print(stu2.level)           #打印primary，这说明在类外部调用实例变量的时候，如果找不到实例变量（发现实例变量name，age和level未定义），就会去找类变量name，age和level
+
+stu2.height=180 
+print(stu2.height)  # 得到180；说明实例变量在类内还是类外都可以定义
+
+Student.height=170
+print(Student.height)   # 得到170；说明类变量在类内还是类外都可以定义
+
+stu2.plus_sum()     # 说明可以用对象调用类方法
+
+总结：
+1.在类中定义且在方法外定义的变量是类变量；使用“self.变量名=值”定义的变量是实例变量。类变量和实例变量是独立的，即使他们的变量名相同。
+2.在实例方法内调用类变量： self.__class__.变量名；
+  在类方法中调用类变量： cls.变量名  cls相当于类名
+  在类外调用类变量可使用：类名.变量名
+  在类外用对象调用类变量：对象.变量名（因为这里如果找不到实例变量会继续往上找类变量） 无需写成 “对象.__class__.变量名”
+3.当调用的实例变量（无论是在类里面调用还是外面调用）不存在时，就会去找相同变量名的类变量，如果该名的类变量也未定义就会去找其父类的类变量，如果也不存在就会报错
+4.实例变量和类变量无论在类内还是类外都可以无需声明直接定义
+5.类方法使用@classmethod修饰定义，类方法作用是用来操作类变量，不过实例方法也可以调用类变量。
+6.self代表实例，对象；cls代表类
+7.可以使用类调用类方法；也可以使用对象调用类方法，但是最好不要这样，因为从逻辑上说不通；
+类能够调用实例方法，只需在传入实例参数。但是这样做没有意义，因为明明已经定义了实例，没有必要使用类调用实例方法并且把实例作参数传入方法中。直接使用实例调用就行。使用实例调用实例方法时，python内部会自动将实例作为第一参传入到self参数中，但是如果使用类调用实例方法，python无法将实例自动传入self参数，需要手动将实例传入第一参。例如：
+
+stu1 = Student(name="zbp",age="20")
+Student.do_homework(stu1)   # 使用类调用实例方法，手动传stu1实例
+
+
+8.类方法的cls 和 实例方法的self 都是在调用方法的时候由类和对象自动传入的。
+9.静态方法无需传cls，静态方法和类方法只有这一点不同，其他都相同。所以用的到静态方法的地方都可以用类方法代替。
+对象和类都能够调用静态方法和类方法
+静态方法和类方法都不能够调用实例变量和实例方法，因为他们的第一参没有传self，如果往他们的其他参数传入对象，那么就可以调用实例变量和方法。
+静态方法中调用类变量和类方法只能通过“类名.变量”来访问
+
+作者建议尽量不要使用静态方法，因为静态方法和类的关系不大，基本上和普通函数没啥差别。
+
+--------------------------------------------
+
+关于类和对象的成员（属性和方法）可见性
+相当于在php中的私有成员，公共成员，保护成员
+
+像上面定义的类，里面的所有成员都可以在外部访问。
+
+如果我们希望某些方法或者属性不能在类之外被访问只需在变量或者方法前加两个__，表示该成员是私有成员（无论是类成员还是实例成员）。
+但是如果你的成员前后都有__，那就不是私有成员，而是变成了魔术方法，魔术方法是公有方法。
+
+# coding=utf-8
+
+
+class Student():
+    __sum=0     # 不希望sum在类外被修改，所以设成私有类变量
+
+    def __init__(self,name,age):
+        self.name=name
+        self.age=age
+        self.__score=0    # score分数每个人都不同，所以不能设置为类变量
+        self.__class__.__plus_sum()
+        print("学生人数："+str(self.__class__.__sum))
+
+    def log_score(self,score):
+        if score<0:
+            return
+        self.__score=score
+        print(self.name+"同学的分数是："+str(self.__score))
+
+    @classmethod
+    def __plus_sum(cls):    # 不希望plus_sum在类外被调用，而是只有实例化时才调用，所以设为私有类方法
+        cls.__sum+=1
+
+
+stu1 = Student("zbp",18)
+stu1.log_score(80)
+print(stu1.__dict__)    # {'name': 'zbp', 'age': 18, '_Student__score': 80}; 说明私有变量__score会被python转为_Student__score，通过这种方式将使得__score无法被访问
+stu1.__score=10   # 不会报错，因为该__score被认为是新定义的属性而不是私有属性__score，也就是说此__score非彼__score
+print(stu1.__dict__)    # {'name': 'zbp', 'age': 18, '_Student__score': 80, '__score':10}; 
+print(stu1.__score) # 10
+
+stu2 = Student("zbp2",18)
+stu1.log_score(80)
+print(stu2.__score)     # 报错,因为此时只有_Student__score，没有__score
+
+# 如果真的想读取或者修改私有属性__score,也是可以的
+print(stu2._Student__score)
+
+总结：
+1.通过加__的方式声明私有属性和私有方法
+2.通过上面的例子知道其实python无法做到真正的私有成员的声明，如果想访问私有成员还是可以访问到。
+3.一般来说，私有变量都会放在方法中做改动，因为这样可以做一些判断之类的防护措施。
+
+
+--------------------------------------------
+继承
+
+class People:
+    sum = 0
+    def __init__(self,name,age):
+        self.name=name
+        self.age=age
+        
+    def get_name(self):
+        print(self.name)
+    
+class Student(People):
+    def __init__(self,school,name,age):
+        #People.__init__(self,name,age)      # 子类调用父类的构造函数；
+        
+        super(Student,self).__init__(name,age)
+        self.school=school
+        
+    def do_homework(self):
+        print("Doing Homework")
+    
+python支持多继承，但是不建议使用。
+
+两种在子类中调用父类的方法：
+1.父类类名.方法名(参数)          # 不推荐，一旦父类改名就要改很多地方
+2.super(子类类名,self).方法名(参数)
+
+例如上面在子类的构造函数调用父类的构造函数：
+People.__init__(self,name,age)  
+这里有两个奇怪的地方，首先它使用类调用实例方法，然后它要手动传入self。这点在之前说过，类可以调用实例方法，而且调用实例方法的时候要手动传入self，因为python无法自动传入self。
+
+super(Student,self).__init__(name,age)
+super(Student,self)返回的是实例，所以无需手动传入self
+
+======================================
+
+Python的魔法函数
+
+魔法函数是类中以“__”开头和“__”结尾的Python内置方法。自己定义的__开头和__结尾的函数不是魔法函数。
+
+魔法函数概览：
+
+字符串表示
+__repr__
+__str__
+
+集合序列相关
+__len__
+__getitem__
+__setitem__
+__delitem__
+__contains__
+
+迭代相关
+__iter__
+__next__
+
+可调用
+__call__
+
+with上下文管理器
+__enter__
+__exit__
+
+数值转换
+__abs__
+__bool__
+__int__
+__float__
+__hash__
+__index__
+
+元类相关
+__new__
+__init__
+
+属性相关
+__getattr__
+__setattr__
+__getattribute__
+__setattribute__
+__dir__
+
+属性描述符
+__get__
+__set__
+__delete__
+
+协程
+__await__
+__aiter__
+__anext__
+__aenter__
+__aexit__
+
+魔术方法基本上都是隐式调用的，即触发某种条件的时候回自动调用。
+
+例如 __str__和__repr__
+
+class Company:
+    def __init__(self,employee):
+        self.employee = employee
+        
+    def __str__(self):
+        return ",".join(self.employee)
+        
+    def __repr__(self):
+        return ",".join(self.employee)
+        
+    def __len__(self):
+        return len(self.employee)
+        
+company = Company(["zbp","yf","cjq"])
+print(compay)
+company
+print(len(company))
+
+当执行print(company)时就会隐式调用__str__()，输出"zbp,yf,cjq"。如果没有定义__str__而print(company)就会报错。
+当执行company,就会调用__repr__(),输出"zbp,yf,cjq"。不过在Python命令行才会输出，运行脚本的方式是不会输出的。
+当执行到len(company)就会隐式调用__len__魔术方法，如果没有定义__len__，执行len(对象)会报错。
+
+其他的魔术方法会在后面介绍。
+
+
+
+=======================================
+抽象基类(abc模块)
+
+Python中的抽象基类类似于PHP中的接口。所以和接口一样，抽象基类是不能实例化的，而且抽象基类中的方法都是没有实现功能的，没有代码的。
+
+抽象基类会定义一些没有内容的方法，子类继承抽象基类后一定要实现这些方法，在这些方法中实现一些功能，否则会报错。
+
+什么场景下会使用抽象基类？当希望某个类或者某些类中必须有某些方法的时候。
+
+根据上面的规则，我们可以自己写一个抽象基类
+class Person():
+    def work(self,job):
+        raise NotImplementedError
+        
+class Student(Person):
+    pass
+    
+stu = new Student()
+stu.work()  # 报错
+
+我们可以在抽象基类的方法中抛出一个异常，如果子类继承抽象基类后不实现抽象基类的方法，那么当子类调用这个方法就会报错。
+通过这种方式强制子类必须实现抽象基类的方法。
+
+但是上面调用work()时才检查到子类没有实现抽象基类的方法然后报错，而我们希望在子类初始化的时候就能检查到。
+
+此时我们可以让父类继承abc模块的ABCMeta类让这个父类变成一个抽象基类。使用@abc.abstractmethod装饰器声明一个方法为抽象方法。这样可以解决上面的问题。
+如下：
+import abc
+class Person(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def work(self,job):
+        pass
+    
+class Student(Person):
+    pass
+    
+class Engineer(Person):
+    def work(self,job): #还是没有实现work方法
+        pass
+    
+class Police(Person):
+    def work(self,job):
+        print("We are Police.My primary job is to "+job)
+        
+#stu = Student()     # 马上报错
+#engineer = Engineer()  # 也会报错
+police = Police()
+police.work("catch bad guy")
+
+我们可以看一下这个@abstractmethod装饰器怎么写的：
+
+def abstractmethod(funcobj):
+    funcobj.__isabstractmethod__ = True
+    return funcobj
+    
+他会对被装饰的函数的__isabstractmethod__属性赋值为True，表示这个函数是一个抽象方法。
+
+
+
+上面的Person类是我们自定义的抽象基类，而Python有内置的抽象基类是放在 collections.abc 模块中的。
+
+当然，实际开发中我们很少用到抽象基类，抽象基类主要是让我们理解Python的类的继承关系和接口的定义，类似于一个代码文档。
+
+
+=====================================
+isinstance 和 type 的区别：
+
+一个例子说明：
+
+class A:
+    pass 
+    
+class B(A):
+    pass
+    
+b = B()
+
+print(isinstance(b,B))     # True
+print(isinstance(b,A))      # True
+
+print(type(b) is B)     # True
+print(type(b) is A)     # False
+
+推荐用isinstance
+
+===============================================
+
+类和实例的属性与方法的查找顺序：
+
+我们知道，一个类A如果继承了类B，B中有一个方法 method() ，如果A不定义这个method方法，也可以使用A的实例调用到method方法。
+
+原因是python会根据继承链查找类的属性和方法，即当调用某个方法或者属性的时候如果在这个类找不到该方法或者属性就会往这个类的父类找，还找不到就往父类的父类找。
+
+如果到了最顶层的类还找不到就报错。
+
+但是我们知道，python是支持多继承的，假如类A,B,C,D,E 
+
+A继承B,C 
+B继承D，C继承E
+
+那么 A的方法和属性的查找顺序是什么样的呢？这里面是存在一个比较复杂的算法的。
+
+可以通过 A.__mro__属性查看查找的顺序
+
+如果 A是先继承B后继承C，如：
+class A(B,C):
+    pass 
+    
+那么 查找顺序就是 A-->B->D->C->E 
+这里遵循深度优先算法
+
+如果
+A继承B,C 
+B，C继承D
+
+那么 查找顺序就是 A-->B->C->D
+这里遵循广度优先算法
+
+===================================
+
+with上下文管理器
+
+with的使用场景是用于需要在开始获取资源，在结束时释放资源的情况。
+
+典型的使用场景是：
+读写文件前后，对文件资源的获取和关闭
+读写数据库前后，对mysql连接的创建和关闭
+多线程中使用条件变量前后，对锁的获取和释放（条件变量是要配合锁使用的，在调用wait和notify之前和之后必须acquire锁和release锁）
+
+如何让一个类能够使用with呢？
+
+只需在类中实现 __enter__ 和 __exit__ 方法即可
+
+例如：
+class Task:
+    def __init__(self,name):
+        self.name = name
+
+    def __enter__(self):
+        print("Do something before task start")
+        return self
+        
+        # return "abc"
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print("Do something after task end")
+
+    def run(self):
+        print("Doing Task %s" % self.name)
+        # raise BaseException
+
+task = Task("Insert Db")
+with task as t:
+    t.run()
+    print(t)
+    
+
+__enter__() 会在执行到 with 语句的时候调用。
+__enter__() 的返回值会赋值给变量 t 
+
+一般 __enter__ 的返回值会返回实例本身，即return self。
+当然 你也可以在  __enter__ 中返回其他东西
+
+__exit__() 会在执行完with代码块中的代码时执行。
+即使 with 中的代码抛出异常， __exit__ 依旧会执行。
+
+所以如果写一个能使用with的类来进行mysql的操作，即使读写操作发生异常，如果将关闭连接写到__exit__中，连接依旧可以关闭
+
+
+
+使用 contextlib 简化上下文管理
+
+上面我们要定义一个类才能使用上下文管理。
+使用contextlib 我们只需定义一个函数，并使用一个装饰器装饰这个函数就可以实现上下文管理
+
+# coding=utf-8
+import contextlib,pymysql
+
+DB_CONF = {
+    "host":"127.0.0.1",
+    "user":"root",
+    "password":"573234044",
+    "database":"test",
+    "charset":"utf8",
+    "cursorclass":pymysql.cursors.DictCursor
+}
+
+@contextlib.contextmanager
+def task():
+    conn = pymysql.connect(**DB_CONF)
+    cursor = conn.cursor()
+    yield (conn,cursor)
+    cursor.close()
+    conn.close()
+    print("close conn")
+
+with task() as (conn,cursor):
+    sql = "select * from stu"
+    cursor.execute(sql)
+    print(cursor.fetchall())
+
+    
+task()函数中必须yield一个东西出来，这个东西会赋值给as之后的变量。
+task()中，yield之前的代码相当于 __enter__() 中的代码，yield之后的代码相当于 __exit__() 中的代码
+
+
+使用类来写这个例子如下：
+class Task:
+    def __enter__(self):
+        self.conn = pymysql.connect(**DB_CONF)
+        self.cursor = self.conn.cursor()
+        return self
+
+        # return "abc"
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cursor.close()
+        self.conn.close()
+        print("close conn")
+
+    def run(self):
+        sql = "select * from stu"
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+
+with Task() as task:
+    res = task.run()
+    print(res)
+    
+    
+    
+    
+======================================
+
+自定义序列类
+
+Python中内置的序列类有：
+list,tuple,deque
+str,bytes,bytearray,array.array 
+
+Python中的序列有两种：可变序列 Sequence 和不可变序列 MutableSequence
+
+MutableSequence 是 Sequence 的子类
+
+
+下面我们看看这两个类的源码是怎么实现的：
+class Sized(metaclass=ABCMeta):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __len__(self):
+        return 0
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Sized:
+            return _check_methods(C, "__len__")
+        return NotImplemented
+
+
+class Container(metaclass=ABCMeta):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __contains__(self, x):
+        return False
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Container:
+            return _check_methods(C, "__contains__")
+        return NotImplemented
+        
+class Iterable(metaclass=ABCMeta):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __iter__(self):
+        while False:
+            yield None
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Iterable:
+            return _check_methods(C, "__iter__")
+        return NotImplemented
+
+        
+class Collection(Sized, Iterable, Container):
+
+    __slots__ = ()
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Collection:
+            return _check_methods(C,  "__len__", "__iter__", "__contains__")
+        return NotImplemented
+
+class Reversible(Iterable):
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __reversed__(self):
+        while False:
+            yield None
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        if cls is Reversible:
+            return _check_methods(C, "__reversed__", "__iter__")
+        return NotImplemented
+        
+class Sequence(Reversible, Collection):
+
+    """All the operations on a read-only sequence.
+
+    Concrete subclasses must override __new__ or __init__,
+    __getitem__, and __len__.
+    """
+
+    __slots__ = ()
+
+    @abstractmethod
+    def __getitem__(self, index):
+        raise IndexError
+
+    def __iter__(self):
+        i = 0
+        try:
+            while True:
+                v = self[i]
+                yield v
+                i += 1
+        except IndexError:
+            return
+
+    def __contains__(self, value):
+        for v in self:
+            if v is value or v == value:
+                return True
+        return False
+
+    def __reversed__(self):
+        for i in reversed(range(len(self))):
+            yield self[i]
+
+    def index(self, value, start=0, stop=None):
+        '''S.index(value, [start, [stop]]) -> integer -- return first index of value.
+           Raises ValueError if the value is not present.
+
+           Supporting start and stop arguments is optional, but
+           recommended.
+        '''
+        if start is not None and start < 0:
+            start = max(len(self) + start, 0)
+        if stop is not None and stop < 0:
+            stop += len(self)
+
+        i = start
+        while stop is None or i < stop:
+            try:
+                v = self[i]
+                if v is value or v == value:
+                    return i
+            except IndexError:
+                break
+            i += 1
+        raise ValueError
+
+    def count(self, value):
+        'S.count(value) -> integer -- return number of occurrences of value'
+        return sum(1 for v in self if v is value or v == value)
+
+Sequence.register(tuple)
+Sequence.register(str)
+Sequence.register(range)
+Sequence.register(memoryview)
