@@ -1,0 +1,46 @@
+# 验证连接池的连接被取空后,再取就会阻塞的实验
+
+import os,threading
+from DBUtils.PooledDB import PooledDB
+import pymysql,random,time
+from queue import Queue
+
+# help(PooledDB)
+
+mysql_conf = {
+    "host":"127.0.0.1",
+    "user":"root",
+    "password":"573234044",
+    "charset":"utf8",
+    "database":"test",
+    "cursorclass":pymysql.cursors.DictCursor
+}
+pool = PooledDB(pymysql,maxconnections=5,blocking=True,**mysql_conf)
+
+def run():
+    conn = pool.connection()
+    cursor = conn.cursor()
+    cursor.execute("select * from test1")
+    conn.commit()
+    r = cursor.fetchall()
+    print(r)
+    t = random.uniform(2, 4.5)
+    time.sleep(t)       # 睡2~4.5秒才释放连接回连接池
+    cursor.close()
+    conn.close()
+
+thread_list=[]
+for i in range(20):
+    thread_list.append(threading.Thread(target=run))
+
+for thread in thread_list:
+    thread.start()
+
+for thread in thread_list:
+    thread.join()
+    
+# 5个连接被20个并发的线程使用
+# 为了查看明显结果,每个线程要占用mysql连接2~4.5秒
+# 结果为,前5个print迅速打印,后面15个print逐一打印,原因是前5个线程可以瞬间同时获取到连接,而后15个线程获取连接时被连接池给阻塞住,只有连接被释放才能获取到
+
+# 结论:如果要使用多线程+连接池的方式并发操作数据库,请保持线程数和连接数一致,否则,多余的并发线程会因为拿不到连接而被阻塞。结果就是开启20个线程工作，实际上并发（即同时的意思）工作的线程只有5个。

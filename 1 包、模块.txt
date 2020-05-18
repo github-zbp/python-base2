@@ -1,0 +1,181 @@
+1.python的循环：
+while 和 for
+
+while condition:
+    pass
+else:
+    print("循环结束")
+
+
+for target_list in expression_list:
+    pass
+else:
+    print("循环结束")
+    
+如果使用break，就不会执行else中的语句。
+
+几个小例子：
+# A 遍历间隔的数
+for x in range(0,10,2):
+    print(x,end="|")
+    
+# range()可传第3个参数表示间隔
+# 结果：0|2|4|6|8|
+
+--------------------
+
+# B 遍历间隔的数
+a=[1,2,3,4,5,6,7,8]
+for i,x in zip(range(len(a)),a):
+    if i%2==1:
+        print(x)
+
+#或者
+for i in range(0,len(a),2):
+    print(a[i])
+
+# 或者使用切片
+b = a[0:len(a):2]       #使用切片的第三参
+print(b)
+---------------------
+
+# C 倒序输出
+for i in range(10,0,-1):
+    print(i)
+# 结果：10 9 8 7 6 5 4 3 2 1
+# 必须要设置第三参为-1，否则遍历不出任何东西
+
+----------------------
+
+2.包，模块，函数和变量作用域
+python的组织结构的层级：
+包--文件夹
+模块--文件 
+类
+函数和变量
+
+关于包的命名空间
+例如 a.a1 ，a就是包名，a1就是模块名。这里就指定了a1这个模块的命名空间。
+
+导入包和模块
+两种方式 “import 模块名”和 “from 模块名 import 变量或函数”
+
+
+a. "import 模块名" 或者 "import 包名.模块名"
+
+例如 本目录下有一个a.py
+import a
+
+想使用a下的变量var1，要写成 a.var1
+
+假如本目录下有一个t目录，里面有一个t1.py,引入t1模块，调用t1的var1变量：
+import t.t1
+
+print(t.t1.var1)    # ok
+print(t1.var1)      # 报错
+
+如果需要其别名：
+import t.t1 as T
+
+
+
+
+b.“from 模块 import 变量或者函数”  或者 “from 包 import 模块”
+
+# 引入t下t1模块下的var1变量
+from t.t1 import var1
+print(var1)
+
+# 引入t1
+from t import t1
+
+# 导入t1下所有的变量和函数
+from t.t1 import *
+print(var1)
+
+# 如何控制t1的变量和函数的导出
+# t1.py 
+__all__ = ["a","b"]     #指定只有a,b变量或者函数才可以导出
+a=2
+b=3
+c=4
+
+# test.py 
+from t.t1 import *
+print(a)    # ok
+print(c)    # 报错
+
+
+import 只能导入模块或者包
+from import可以导入模块内的函数和变量和类,也可以导入模块
+
+
+关于__init__.py
+包是一个文件夹，但是一个文件夹不一定是一个包。文件夹中有__init__.py文件的才是一个包，__init__.py可以什么内容都没有。
+__init__.py的命名空间不是“包名.__init__.py”，而是包名本身。
+所以我们 import 包名，其实引入的不是文件夹，而是文件夹中的__init__.py文件
+
+当我们 导入一个包的时候或者导入这个包下的模块，会调用__init__.py 文件内容
+
+例如：
+t目录下：
+# __init__.py
+a="this is __init__.py"
+print(a)
+
+# test.py 
+import t    # 会输出a
+
+
+__init__.py的应用场景
+1.可以在该文件内限定可以导出什么模块
+
+t 目录有
+__init__.py
+a.py 
+b.py
+c.py
+
+# __init__.py
+__all__=["a","c"]   # 只允许a/c这两个模块导出
+
+# test.py
+from t import *
+print(a)
+print(b)    # 报错
+print(c)
+
+2.可以批量导入模块
+例如，test.py 要引入 sys,io,datetime,pymysql.....很多个模块
+但是不想在test.py中写这么多模块的引入
+import sys,io,datetime,pymysql.....
+
+此时可以在t目录下的__init__.py中引入：
+# __init__.py
+import sys,io,datetime,pymysql,.....
+
+# test.py
+import t    # 会将sys,io,datetime,pymysql,.....都引入进来
+print(sys)  # 报错
+print(t.sys)    # ok
+
+# 或者 from t import *
+# print(sys)    
+
+最后注意：
+包和模块是不会被重复导入的。
+避免循环导入，例如a模块导入b模块，b模块又导入a模块，这样会报错
+
+
+
+有一个比较容易犯的错误：
+t目录下有t1这个模块，t1有变量var1
+
+import t
+print(t.t1)     # 报错，t1不存在
+
+import t.t1
+print(t.t1)     # 正确
+
+from t import t1
+print(t1.var1)  # 正确
