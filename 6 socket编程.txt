@@ -53,7 +53,7 @@ sock,addr = server.accept() 中的sock
 其中 server这个套接字是服务端用于监听ip和port的套接字
 而 sock 是客户端套接字，也就是用于和客户端进行消息接收(recv())和消息发送(send())的套接字
 
-即使 server这个套接字close()了，只要sock没有close，客户端和服务端就可以进行通信
+即使 server这个套接字close()了，只要sock没有close，已连接的客户端和服务端就可以进行通信。但是旧的客户端虽然可以通信，但是新的客户端就不能连接进来服务器了。
 
 
 2.socket的accept()方法
