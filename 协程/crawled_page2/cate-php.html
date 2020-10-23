@@ -1,0 +1,830 @@
+4d2
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>PHP栏目-张柏沛IT博客</title>
+    <meta name="keywords" content="张柏沛,个人博客,IT技术博客,PHP教程,Python爬虫,SEO基础知识,前端技术,MySQL教程,人工智能,科技新闻资讯,Web开发,互联网,5G" />
+	<meta name="description" content="张柏沛的IT个人博客,向大家分享自己的php,python和SEO等学习历程和知识,发布有关php/python/seo的技术杂文,展现最新的互联网资讯和智能科技新闻" />
+	<meta charset="UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/statics/css/main.css"/>
+	<script type="text/javascript" src="/statics/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+   <script> 
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/
+26c0
+linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?4898023a3a963db158d0eeee27c56c80";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script></head><body>
+<div class="header-box  pc">
+	<div class="header-inner">
+		<h1 class="header-logo">
+			<a href="/" rel="home"><img src="/logo.jpg" alt="PHP栏目-张柏沛IT博客" title="PHP栏目-张柏沛IT博客" /></a>
+		</h1>
+		<div class="search-box">
+			<form class="search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="search-btn" class="btn btn-primary">搜索</button>
+			</form>
+		</div>
+	</div>
+	
+	<div class="header-cate">
+		<ul id="header-cate-ul">
+		<a class="top-cate-a" href="/">
+		<li class="father-li float">
+			首页
+		</li>
+		</a>
+		            <a href="/cate-php">
+			<li class="father-li active">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="father-li ">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="father-li ">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="father-li ">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="father-li ">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="father-li ">
+			
+			Web前端</li>
+			</a>
+            
+							
+			<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div>	<div class="mobile" style="height:70px"></div>
+<div class="header-box-mobile mobile">
+	<div class="header-mobile-img">
+		<a href="/"><img src="/logo-no-word.jpg"></a>
+	</div>
+	<div class="header-mobile-btn">
+		<ul class="header-btn-ul">
+			<li class="mobile-search float"></li>
+			<li class="mobile-navbar float"></li>
+		</ul>
+	</div>
+</div>
+<div class="header-box-modal mobile">
+	<div class="header-box-btn">
+	</div>
+	<div class="header-box-right">
+		<ul class="header-box-ul">
+		<a href="/" rel="home">
+		<li class="">
+			首页
+		</li>
+		</a>
+			            <a href="/cate-php">
+			<li class="active">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="">
+			
+			Web前端</li>
+			</a>
+            
+						<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div><div class="search-modal mobile">
+	<div class="mobile-close black-close" style="width:20px;height:20px"></div>
+	<div class="mobile-search-form-box">
+		<form class="mb-search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="mb-search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="mb-search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="mb-search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="mb-search-btn" class="btn btn-primary">搜索</button>
+			</form>
+			<script>
+				
+			</script>
+	</div>
+</div><div id="container">
+	<div class="c-all">
+		所在位置：<a href="/">首页</a> > <a href="/cate-php">PHP</a>		<div class="cate-desc">
+			<div class="cate-name-box">PHP<div></div></div>
+			<p>
+				张柏沛的IT个人博客,向大家分享自己的php,python和SEO等学习历程和知识,发布有关php/python/seo的技术杂文,展现最新的互联网资讯和智能科技新闻			</p>
+		</div>
+	</div>
+	<div class="c-left">
+		<div class="section sec1">
+			
+		</div>
+		
+		<div class="section sec2">
+			<div class="section-head">
+				最新文章
+			</div>
+			<div class="section-content">
+				<ul class="index-ul-blog">
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-129.html" target="_blank">
+								<img src="/uploads/images/20200119/36d8a23c03ad43ae4e37e427bf457b24.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP使用PDO操作mysql" alt="PHP使用PDO操作mysql"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-129.html" target="_blank" title="PHP使用PDO操作mysql">PHP使用PDO操作mysql</a></h2>
+							<div>发布时间:<span>2020-01-19 16:18</span></div>
+							<p>1.pdo连接数据库(初始化)：$pdo=new PDO(&quot;mysql:host=localhost;dbname=库名&quot;,&quot;用户名&quot;,&quot;密码&quot;);2.执行增删改：$res=$pdo-&amp;gt;exec</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag3-Mysql" title="Mysql" target="_blank">Mysql</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-92.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十八） Session和Cookie会话控制" alt="PHP基础（十八） Session和Cookie会话控制"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-92.html" target="_blank" title="PHP基础（十八） Session和Cookie会话控制">PHP基础（十八） Session和Cookie会话控制</a></h2>
+							<div>发布时间:<span>2019-12-08 21:48</span></div>
+							<p>HTTP是无状态的协议，所以不能维护两个事物间的状态。但一个用户在请求一个页面以后再请求另一个页面时，需要让服务期知道这是一个用户。总共有3种数据传递方式。
+超链接或者header()函数等重定向方</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-91.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十七） 使用PHP操作Mysql" alt="PHP基础（十七） 使用PHP操作Mysql"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-91.html" target="_blank" title="PHP基础（十七） 使用PHP操作Mysql">PHP基础（十七） 使用PHP操作Mysql</a></h2>
+							<div>发布时间:<span>2019-12-07 18:23</span></div>
+							<p>PHP访问MySQL数据库服务器是通过安装相应的扩展模块完成的，本章重点是介绍使用mysqli扩展模块中的函数去访问MySQL。如果对MySQL不了解的朋友可以查看本站中MySQL的文章：Mysql基</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+							
+e88
+										<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag3-Mysql" title="Mysql" target="_blank">Mysql</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-86.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十六） 使用PHP进行文件上传和下载" alt="PHP基础（十六） 使用PHP进行文件上传和下载"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-86.html" target="_blank" title="PHP基础（十六） 使用PHP进行文件上传和下载">PHP基础（十六） 使用PHP进行文件上传和下载</a></h2>
+							<div>发布时间:<span>2019-12-05 16:34</span></div>
+							<p>使用PHP进行文件上传和下载1&amp;nbsp;文件上传客户端文件上传的form表单：
+&amp;lt;html&amp;gt;
+    &amp;lt;head&amp;gt;&amp;lt;title&amp;gt;文件上</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-67.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十五） PHP操作文件系统（下）" alt="PHP基础（十五） PHP操作文件系统（下）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-67.html" target="_blank" title="PHP基础（十五） PHP操作文件系统（下）">PHP基础（十五） PHP操作文件系统（下）</a></h2>
+							<div>发布时间:<span>2019-11-26 15:25</span></div>
+							<p>续上一节文件的打开与关闭fopen&amp;nbsp;--&amp;nbsp;打开文件或者 URL&amp;nbsp;语法：resource fopen ( string filename, string mode [, b</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-66.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src=
+5e6
+'/static/home/images/default.png'" title="PHP基础（十四） PHP操作文件系统（上）" alt="PHP基础（十四） PHP操作文件系统（上）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-66.html" target="_blank" title="PHP基础（十四） PHP操作文件系统（上）">PHP基础（十四） PHP操作文件系统（上）</a></h2>
+							<div>发布时间:<span>2019-11-26 15:17</span></div>
+							<p>文件类型在程序运行时，程序本身和数据一般都存在内存中，当程序运行结束后，存放在内存中的数据被释放。如果需要长期保存程序运行所需的原始数据，或程序运行产生的结果，就必须以文件形式存储到外</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blo
+4000
+g-65.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十三） GD库&mdash;&mdash;图像操作" alt="PHP基础（十三） GD库&mdash;&mdash;图像操作"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-65.html" target="_blank" title="PHP基础（十三） GD库&mdash;&mdash;图像操作">PHP基础（十三） GD库&mdash;&mdash;图像操作</a></h2>
+							<div>发布时间:<span>2019-11-26 15:03</span></div>
+							<p>PHP 不仅限于只产生 HTML 的输出，还可以创建及操作多种不同格式的图像文件。PHP提供了一些内置的图像信息函数，也可以使用GD函数库创建新图像或处理已有的图像。目前GD2库支持GIF、JPEG、</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-64.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十二） PHP的日期和时间" alt="PHP基础（十二） PHP的日期和时间"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-64.html" target="_blank" title="PHP基础（十二） PHP的日期和时间">PHP基础（十二） PHP的日期和时间</a></h2>
+							<div>发布时间:<span>2019-11-26 14:49</span></div>
+							<p>UNIX时间戳Unix 时间戳 :自从 Unix 纪元（格林威治时间 1970 年 1 月 1 日 00:00:00）到当前时间的秒数,是一个十位数的整数&amp;nbsp;相关函数：time( ): 函数返</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-63.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十一） PHP错误处理" alt="PHP基础（十一） PHP错误处理"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-63.html" target="_blank" title="PHP基础（十一） PHP错误处理">PHP基础（十一） PHP错误处理</a></h2>
+							<div>发布时间:<span>2019-11-26 14:11</span></div>
+							<p>PHP程序的错误发生一般归属于下列三个领域：语法错误：语法错误最常见，并且也容易修复。如：代码中遗漏一个分号。这类错误会阻止脚本的执行。运行时错误：这种错误一般不会阻止PHP脚本的执行，但会阻止当前要</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-62.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（十） PHP的正则表达式（下）" alt="PHP基础（十） PHP的正则表达式（下）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-62.html" target="_blank" title="PHP基础（十） PHP的正则表达式（下）">PHP基础（十） PHP的正则表达式（下）</a></h2>
+							<div>发布时间:<span>2019-11-25 17:00</span></div>
+							<p>正则查询1.函数preg_match() --执行一个正则表达式匹配int preg_match(string $pattern, string $subject[,array &amp;amp;$match</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																	<li class="float art-tags-li"><a href="/tag6-正则表达式" title="正则表达式" target="_blank">正则表达式</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-61.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（九） PHP的正则表达式（中）" alt="PHP基础（九） PHP的正则表达式（中）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-61.html" target="_blank" title="PHP基础（九） PHP的正则表达式（中）">PHP基础（九） PHP的正则表达式（中）</a></h2>
+							<div>发布时间:<span>2019-11-25 16:46</span></div>
+							<p>字符串边界限制在某些情况下，需要对匹配范围进行限定，以获得更准确的匹配结果。&amp;ldquo;^&amp;rdquo;和&amp;ldquo;$&amp;rdquo;分别指定字符串的开始和结束。例如，在字符串&amp;l</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																	<li class="float art-tags-li"><a href="/tag6-正则表达式" title="正则表达式" target="_blank">正则表达式</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-60.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（八） PHP的正则表达式（上）" alt="PHP基础（八） PHP的正则表达式（上）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-60.html" target="_blank" title="PHP基础（八） PHP的正则表达式（上）">PHP基础（八） PHP的正则表达式（上）</a></h2>
+							<div>发布时间:<span>2019-11-25 15:57</span></div>
+							<p>正则表达式简介:
+正则表达式是用于描述字符排列和匹配模式的一种语法规则。它主要用于字符串的模式分割、匹配、查找及替换操作。到目前为止，我们前面所用过的精确（文本）匹配也是一种正则表达式。
+</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																	<li class="float art-tags-li"><a href="/tag6-正则表达式" title="正则表达式" target="_blank">正则表达式</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-59.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（七） PHP字符串及相关函数" alt="PHP基础（七） PHP字符串及相关函数"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-59.html" target="_blank" title="PHP基础（七） PHP字符串及相关函数">PHP基础（七） PHP字符串及相关函数</a></h2>
+							<div>发布时间:<span>2019-11-25 15:38</span></div>
+							<p>&amp;nbsp;在C语言中字符串是作为字节数组处理的。在Java语言中字符串是作为对象处理的。而php则把字符串作为基本数据类型来处理。通常对字符串的处理涉及字符串的格式化。字符串的分割和连接、字符串的比</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-56.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（七） PHP数组之与数组相关的函数" alt="PHP基础（七） PHP数组之与数组相关的函数"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-56.html" target="_blank" title="PHP基础（七） PHP数组之与数组相关的函数">PHP基础（七） PHP数组之与数组相关的函数</a></h2>
+							<div>发布时间:<span>2019-11-19 21:36</span></div>
+							<p>预定义数组1 &amp;nbsp;服务器变量： $_SERVER2 &amp;nbsp;环境变量：$_ENV3 &amp;nbsp;HTTP GET变量：$_GET4 &amp;nbsp;HHTP P</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-55.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（六） PHP数组之数组的定义和遍历" alt="PHP基础（六） PHP数组之数组的定义和遍历"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-55.html" target="_blank" title="PHP基础（六） PHP数组之数组的定义和遍历">PHP基础（六） PHP数组之数组的定义和遍历</a></h2>
+							<div>发布时间:<span>2019-11-19 21:35</span></div>
+							<p>PHP 中的数组实际上是一个有序图。图是一种把 values 映射到 keys 的类型。此类型在很多方面做了优化，因此可以把它当成真正的数组来使用，或列表（矢量），散列表（是图的一种实现），字典，集合</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-54.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础（五） PHP自定义函数（下）" alt="PHP基础（五） PHP自定义函数（下）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-54.html" target="_blank" title="PHP基础（五） PHP自定义函数（下）">PHP基础（五） PHP自定义函数（下）</a></h2>
+							<div>发布时间:<span>2019-11-19 21:11</span></div>
+							<p>匿名函数也叫闭包函数（closures），允许临时创建一个没有指定名称的函数。最经常用作回调函数（callback）参数的值。当然，也有其它应用的情况。
+&amp;lt;?php
+    </p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-53.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础(四) PHP自定义函数（上）" alt="PHP基础(四) PHP自定义函
+284f
+数（上）"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-53.html" target="_blank" title="PHP基础(四) PHP自定义函数（上）">PHP基础(四) PHP自定义函数（上）</a></h2>
+							<div>发布时间:<span>2019-11-19 20:59</span></div>
+							<p>函数是什么:函数（function）是一段完成指定任务的已命名代码块。函数可以遵照给它的一组值或参数完成特定的任务，并且可能返回一个值。在PHP中有两种函数：自定义函数与系统函数。 函数的优越</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-52.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础(三) PHP的运算符和表达式" alt="PHP基础(三) PHP的运算符和表达式"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-52.html" target="_blank" title="PHP基础(三) PHP的运算符和表达式">PHP基础(三) PHP的运算符和表达式</a></h2>
+							<div>发布时间:<span>2019-11-19 20:31</span></div>
+							<p>php中的运算符算数运算符 字符串运算符赋值运算符 比较运算符逻辑运算符位运算符其他运算符运算符的优先级运算符是可以通过给出的一或多个值（用编程行话来说，表达式）来产生另一个值（因而整个结构成为一个表</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-51.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础(二) PHP的基础语法和变量类型" alt="PHP基础(二) PHP的基础语法和变量类型"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-51.html" target="_blank" title="PHP基础(二) PHP的基础语法和变量类型">PHP基础(二) PHP的基础语法和变量类型</a></h2>
+							<div>发布时间:<span>2019-11-17 01:32</span></div>
+							<p>首先PHP文件以php为后缀名。可以在命令行中使用 php 命令运行，也可以在浏览器中 访问 127.0.0.1/PHP文件名 来运行。当然后者的话你得先启动wamp服务才行。我们用&amp;lt;?</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-50.html" target="_blank">
+								<img src="/uploads/images/20191112/3c8b260bc0d839864f1ea8c236313532.jpg" onerror="this.src='/static/home/images/default.png'" title="PHP基础(一)  安装lamp和wamp" alt="PHP基础(一)  安装lamp和wamp"/>
+								<a class="cate-tag1" href="/cate-php">PHP</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-50.html" target="_blank" title="PHP基础(一)  安装lamp和wamp">PHP基础(一)  安装lamp和wamp</a></h2>
+							<div>发布时间:<span>2019-11-12 21:29</span></div>
+							<p>PHP是什么？PHP(Hypertext Preprocessor缩写)超级文本预处理器。PHP是一种在服务器端执行的嵌入HTML文档的脚本语言。PHP是目前最流行的网站开发语</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag14-PHP基础" title="PHP基础" target="_blank">PHP基础</a></li>
+																	<li class="float art-tags-li"><a href="/tag13-PHP" title="PHP" target="_blank">PHP</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+									</ul>
+			</div>
+			
+			<div id="page">
+							</div>
+		</div>
+		
+	</div>	<div class="c-right">
+		<div class="section-head">
+			热门推荐
+		</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐文章
+	</div>
+	<ul class="right-ul">
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-50.html" target="_blank">PHP基础(一)  安装lamp和wamp</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-52.html" target="_blank">PHP基础(三) PHP的运算符和表达式</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-92.html" target="_blank">PHP基础（十八） Session和Cookie会话控制</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-53.html" target="_blank">PHP基础(四) PHP自定义函数（上）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-51.html" target="_blank">PHP基础(二) PHP的基础语法和变量类型</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-60.html" target="_blank">PHP基础（八） PHP的正则表达式（上）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-91.html" target="_blank">PHP基础（十七） 使用PHP操作Mysql</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-66.html" target="_blank">PHP基础（十四） PHP操作文件系统（上）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-65.html" target="_blank">PHP基础（十三） GD库&mdash;&mdash;图像操作</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-56.html" target="_blank">PHP基础（七） PHP数组之与数组相关的函数</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-63.html" target="_blank">PHP基础（十一） PHP错误处理</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-62.html" target="_blank">PHP基础（十） PHP的正则表达式（下）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-67.html" target="_blank">PHP基础（十五） PHP操作文件系统（下）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-129.html" target="_blank">PHP使用PDO操作mysql</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-64.html" target="_blank">PHP基础（十二） PHP的日期和时间</a>
+		</li>
+		</ul>
+</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐新闻
+	</div>
+	<ul class="right-ul">
+		</ul>
+</div>
+					<div class="right-content right-tags-content">
+	<div class="right-head">
+		相关资讯标签
+	</div>
+	<ul class="right-ul">
+		</ul>
+</div>
+			</div>
+</div>
+<div style="clear:both;"></div>
+<div id="footer">
+	<div class="footer-inner">
+		<div class="footer-logo">
+			<a href="/" rel="home">
+				<img src="/logo.jpg" title="" alt=""/>
+			</a>
+		</div>
+		<div class="footer-cate pc">
+			<ul>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-php" target="blank">PHP</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-python" target="blank">Python</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-seo" target="blank">SEO优化</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-linux" target="blank">Linux</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-mysql" target="blank">MySQL</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-web" target="blank">Web前端</a>
+					</li>
+								<li class="footer-cate-li float">
+					<a href="/about" target="blank">关于作者</a>
+				</li>
+			</ul>
+			
+			
+		</div>
+		
+	</div>
+	<center id="ba">张柏沛的个人IT技术博客 © www.zbpblog.com - <a href="http://beian.miit.gov.cn" target="_blank">粤ICP备19143107号</a><br/><a href="/sitemap.xml" title="网站地图" target="_blank">网站地图</a></center>
+	
+</div><script type="text/javascript" src="/statics/js/jquery.lazyload.js"></script>
+<script type="text/javascript" src="/statics/js/main.js"></script></body>
+</html>
+0

@@ -1,0 +1,387 @@
+本文对“python高级语法”一文作重新说明和补充说明。
+
+一、变量作用域规则（局部变量和全局变量）
+
+例子1：在函数中打印变量
+def f1(a):
+	print(a)
+	print(b)
+	
+f1(10)
+	
+结果：
+10
+Traceback (most recent call last):
+  File "C:/Users/Administrator/Desktop/test3.py", line 5, in <module>
+    f1(10)
+  File "C:/Users/Administrator/Desktop/test3.py", line 3, in f1
+    print(b)
+NameError: name 'b' is not defined
+
+
+下面我们运行
+dis(f1)
+查看一下f1函数的字节码，这些字节码会为我们展现f1函数的具体运行过程以及各个变量是局部变量还是全局变量。
+
+字节码如下：
+  4           0 LOAD_GLOBAL              0 (print)	# 加载全局函数 print
+              2 LOAD_FAST                0 (a)      # 加载局部变量a
+              4 CALL_FUNCTION            1			# 调用print函数
+              6 POP_TOP
+
+  5           8 LOAD_GLOBAL              0 (print)  # 加载全局函数 print
+             10 LOAD_GLOBAL              1 (b)      # 加载全局变量 b
+             12 CALL_FUNCTION            1          # 调用print函数
+             14 POP_TOP
+             16 LOAD_CONST               0 (None)
+             18 RETURN_VALUE
+
+上面LOAD_FAST是加载局部变量的意思， LOAD_GLOBAL是加载全局变量的意思
+
+由于a被传入函数f1中，a就是一个在f1作用域下的局部变量。
+而b会被python解释器认为是一个全局变量，但是全局作用域下不存在全局变量b，所以报错
+
+
+
+例子2：
+b = 6
+def f1(a):
+	print(a)
+	print(b)
+
+结果：	
+10
+6
+
+现在python解释器在全局作用域下找到了b变量
+
+
+例子3：
+b = 6
+def f1(a):
+	print(a)
+	print(b)
+	b = 9
+	
+f1(10)
+
+结果：
+10
+Traceback (most recent call last):
+  File "C:/Users/Administrator/Desktop/test3.py", line 10, in <module>
+    f1(10)
+  File "C:/Users/Administrator/Desktop/test3.py", line 6, in f1
+    print(b)
+UnboundLocalError: local variable 'b' referenced before assignment
+
+
+查看一下f1的字节码：
+5           0 LOAD_GLOBAL              0 (print)
+              2 LOAD_FAST                0 (a)		# 加载局部变量a
+              4 CALL_FUNCTION            1
+              6 POP_TOP
+
+  6           8 LOAD_GLOBAL              0 (print)
+             10 LOAD_FAST                1 (b)      # 加载局部变量b
+             12 CALL_FUNCTION            1
+             14 POP_TOP
+
+  7          16 LOAD_CONST               1 (9)
+             18 STORE_FAST               1 (b)		# 存储局部变量b
+             20 LOAD_CONST               0 (None)
+             22 RETURN_VALUE
+
+从上述字节码可以看出，python解释器把f1内的变量b当做是局部变量而非全局变量，而局部变量b的引用在b的定义之前，所以报错。
+
+为什么python会认为f1中的b是局部变量？因为在f1中对b进行了赋值，所以f1内的b就被python解释器认为是局部变量（但是请不要说b从全局变量变成了局部变量，这种说法是不对的）。
+
+
+例子4：global
+b = 6
+def f1(a):
+	global b
+	print(a)
+	print(b)
+	b = 9
+	
+f1(10)
+
+结果：
+10
+6
+
+使用global可以强制让python解释器把局部作用域中的b认为是全局变量。
+
+
+=====================================================================
+
+二、闭包（closure）和自由变量（有些叫法叫做环境变量）
+
+首先我们用一个例子引出几个和闭包相关的概念
+外部函数、内部函数、自由变量(环境变量)、闭包
+
+
+例子3： 移动平均值函数
+
+我想实现一个求平均值的函数avg，每一次调用avg都会根据传入的值做一次平均值更新，比如：
+avg(10)		# 得到10
+avg(14)		# 得到12
+avg(15)		# 得到13（(10+14+15)/3 = 13）
+
+实现如下：
+
+# 定义外部函数 make_averager
+def make_averager():
+	item = []
+	
+	# 定义内部函数
+	def avg(n):
+		item.append(n)
+		return sum(item)/len(item)
+	
+	return avg
+	
+外部函数是内部创建了函数的函数，就是 make_averager 
+内部函数是在函数中被创建的函数，就是 avg
+自由变量指未在本地作用域绑定的变量，此例中就是 item 
+
+对于make_averager函数，item是它的局部变量
+对于avg函数，item是它的自由变量
+
+
+闭包是引用了自由变量的内部函数（即avg函数），闭包必须满足两个条件：
+A.它本身得是一个内部函数，是函数中被创建的函数
+B.该内部函数中引用了（即使用了）外部函数中的变量（自由变量）
+
+但其实我更愿意把闭包理解为是一种环境，它包含了内部函数和在内部函数中引用但是未在内部函数定义的变量。在《流畅的python》一书中，闭包是如下图所示的内容：
+
+所以 闭包 = 内部函数 + 自由变量
+
+自由变量的特点：
+1.自由变量不会随着外部函数的回收而被清除
+具体体现为：
+avg = make_averager()	# 此时 make_averager 调用完毕，会被回收，但是item变量依旧留在内存中没有被释放
+
+2.内部函数对自由变量做出的改变会被保存，如果php的static静态变量一样
+
+一个内部函数的所有自由变量都会保存到闭包中，具体为代码表现就是保存在 avg.__closure__ 这个对象中。这也是为什么每次对自由变量做出的更改能被保存下来的原因，因为每次更新完自由变量后都会存到avg.__closure__中。
+
+
+如何查看一个闭包有哪些局部变量和自由变量。
+print(avg.__code__.co_varnames)		# 查看内部函数的局部变量
+print(avg.__code__.co_freevars)		# 查看内部函数的自由变量
+
+结果：
+('n',)
+('item',)
+
+
+如何查看闭包中自由变量的内容。
+print(avg.__closure__[0].cell_contents)	# 查看闭包的自由变量的值
+
+闭包内自由变量的改变都会在 cell_contents 中更新。
+
+如果一个内部函数不是闭包，则它就没有 __closure__ 属性，此时执行 avg.__closure__ 会报错。
+
+
+===============================================
+
+例子4：移动平均值函数的改进版
+
+def make_averager():
+	total = 0
+	count = 0
+
+	# 定义内部函数
+	def avg(n):
+		total += n
+		count += 1
+		return total / count
+
+	return avg
+
+avg = make_averager()
+print(avg(10))
+print(avg(20))
+print(avg(30))
+print(avg.__code__.co_varnames)		# 查看闭包的局部变量
+print(avg.__code__.co_freevars)		# 查看闭包的自由变量
+print(avg.__closure__[0].cell_contents)	# 查看闭包的自由变量count的值
+
+这个函数对例子3做出了改进，不使用列表存储每一个数，而是用total和count记录总数和数的个数。
+
+但是这个例子又个缺陷：内部函数把total和count给重新赋值（total+=n 相当于 total = total  + 1），这样会为total和count隐式生成局部变量，python解释器会认为total和count时局部变量而非自由变量。由于局部变量中没有定义total，所以执行total = total + 1会报错。
+
+
+解决方法：使用nonlocal声明total和count。这个关键字会把变量标记为自由变量, 即使在内部函数对变量做出了重新赋值，这个变量也依旧时自由变量。
+
+def make_averager():
+	total = 0
+	count = 0
+
+	# 定义内部函数
+	def avg(n):
+		nonlocal total, count
+		total += n
+		count += 1
+		return total / count
+
+	return avg
+	
+	
+==============================================
+
+接下来的例子用于介绍python闭包的一些特性和注意点：
+
+1.闭包的自由变量会永驻内存直到脚本运行结束，且外部函数创建的每一个闭包都不是同一个对象
+
+例子5：
+# 以上面的make_average为例。
+
+avg1 = make_averager()	    # 返回一个闭包
+avg2 = make_averager()		# 返回一个闭包
+print(avg1 == avg2)			# 结果为False
+
+avg1不等于avg2，因为 make_averager 这个外部函数每创建出一个闭包avg，就会在内存新开一块内存保存这个闭包和它的自由变量。
+因此，avg1 和 avg2 是存在于不同的两块内存空间中的，互相独立。 avg1和avg2内的自由变量也是互相独立的。
+
+只要创建了 avg ，自由变量total和count就会一直存在与内存而不会被回收，因为total和count保存在了__closure__中。
+除非我们 del avg ，把这个闭包删除了，此时 avg.__closure__也就不存在了，total和count才会被回收。
+
+这也体现了闭包的作用：可以保存当前的运行环境（这是__closure__ 和 自由变量 的功劳）
+
+
+
+2. 返回函数不要引用任何循环变量
+
+例子6：在一个外部函数中创建多个闭包
+def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i
+        fs.append(f)
+    return fs
+
+f1, f2, f3 = count()		# 这里返回了3个闭包
+
+# 调用 
+>>> f1()
+9
+>>> f2()
+9
+>>> f3()
+9
+
+这和我们想的结果 1 4 9 不同，最后结果是3个9
+
+其实道理很简单，__closure__中保存的自由变量不是定义内部函数时的自由变量的值，而是外部函数返回内部函数是的自由变量值。
+
+上例中，定义3个内部函数时的i时1，2，3。但是return fs 时自由变量i的值就是3。
+
+
+======================================================
+
+总结：
+闭包的概念：外部函数中定义了内部函数，且内部函数引用了未在内部函数定义的变量（自由变量），这样的内部函数就是闭包。 闭包 = 内部函数本身 + 自由变量
+闭包的作用：保存内部函数当前的与运行环境
+自由变量的概念：未在本地作用域被定义，却在本地作用与被引用（使用）的变量
+自由变量的特定：变量的每一次更改会被保存
+
+如何判断一个函数引用是否为闭包：查看一下这个引用的__closure__属性看有没有报错即可
+
+======================================================
+
+三、装饰器（decorator）
+
+装饰器本质上就是一个定义了内部函数的外部函数。
+
+下面直接展示如何定义和使用一个普通的装饰器
+
+例子7：记录程序运行时间
+
+from time import perf_counter
+
+# 定义一个clock装饰器
+def clock(func):		# func是funcWithClock的自由变量
+	# 定义一个内部函数，我把它命名为funcWithClock意思是：带上了计时功能的函数
+	def funcWithClock(*args):
+		st = perf_counter()		# perf_counter函数用于返回当前的精确时间
+		res = func(*args)
+		print("函数 %s 运行耗时：%f" % (func.__name__, perf_counter() - st))
+		return res
+	
+	return funcWithClock
+	
+
+#使用clock装饰器
+@clock
+def runIter(n):
+	for i in range(n):
+		a = 0
+		
+runIter(100000)		# 调用被装饰器修改过的runIter函数
+
+
+装饰器的工作原理：
+定义装饰器其实就是定义一个有内部函数的外部函数。
+使用装饰器其实就是创建了一个闭包，在例7中，runIter就是一个闭包。
+
+@clock
+def runIter(n):
+	for i in range(n):
+		a = 0
+
+这4行代码其实做了下面的事情：
+
+def runIter(n):
+	for i in range(n):
+		a = 0
+runIter = clock(runIter)
+
+这两者完全等价，@clock做的事情就是 runIter = clock(runIter)。所以@clock其实是一个语法糖。
+
+由于clock()返回了一个闭包给runIter这个引用，所以runIter就是一个闭包，可以通过 __closure__ 验证。
+
+
+装饰器 clock() 的作用是把传入外部函数的runIter函数做出了修改，并把修改后的函数重新赋值给runIter引用。
+
+这里就引出了装饰器的作用：
+装饰器可以将传入的函数进行修改，修改为一个新函数。新函数接收和旧函数相同的参数，返回和旧函数相同的值，只不过新函数会在旧函数基础上做些额外操作。
+
+一个标准的装饰器，他的外部函数的参数要传一个函数引用，内部函数要传的参数得和被装饰的函数相同，最好是传入 *args, **kwargs
+
+
+=====================================
+
+装饰器的执行时机：
+装饰器在被装饰的函数定义的时候运行，而不是在调用的时候运行。
+
+from time import perf_counter
+
+def clock(func):
+	print("装饰器开始运行")
+	def funcWithClock(*args):
+		st = perf_counter()		
+		res = func(*args)
+		print("函数 %s 运行耗时：%f" % (func.__name__, perf_counter() - st))
+		return res
+	
+	return funcWithClock
+	
+@clock
+def runIter(n):
+	for i in range(n):
+		a = 0
+		
+runIter(100000)
+
+这个例子中，当定义 runIter 函数的时候（而不是在调用runIter的时候），系统会自动隐式调用 clock(runIter)。
+
+===============================
+
+总结：
+装饰器本质是一个含有闭包的外部函数。
+装饰器的参数是另一个函数的引用。
+装饰器的作用：对被装饰函数进行一系列扩展和功能添加，把一个函数变成另一个函数
+装饰器会在被装饰函数定义的时候被调用。

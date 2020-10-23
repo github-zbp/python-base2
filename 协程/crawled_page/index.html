@@ -1,0 +1,754 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>张柏沛的个人IT技术博客-专注和分享PHP建站和Python技术的学习博客</title>
+    <meta name="keywords" content="张柏沛,个人博客,IT技术博客,PHP教程,Python爬虫,SEO基础知识,前端技术,MySQL教程,人工智能,科技新闻资讯,Web开发,互联网,5G" />
+	<meta name="description" content="张柏沛的IT个人博客,向大家分享自己的php,python和SEO等学习历程和知识,发布有关php/python/seo的技术杂文,展现最新的互联网资讯和智能科技新闻" />
+	<meta charset="UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/statics/css/main.css"/>
+	<script type="text/javascript" src="/statics/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+   <script> 
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?4898023a3a963db158d0eeee27c56c80";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script></head><body>
+<div class="header-box  pc">
+	<div class="header-inner">
+		<h1 class="header-logo">
+			<a href="/" rel="home"><img src="/logo.jpg" alt="张柏沛的个人IT技术博客-专注和分享PHP建站和Python技术的学习博客" title="张柏沛的个人IT技术博客-专注和分享PHP建站和Python技术的学习博客" /></a>
+		</h1>
+		<div class="search-box">
+			<form class="search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="search-btn" class="btn btn-primary">搜索</button>
+			</form>
+		</div>
+	</div>
+	
+	<div class="header-cate">
+		<ul id="header-cate-ul">
+		<a class="top-cate-a" href="/">
+		<li class="father-li float">
+			首页
+		</li>
+		</a>
+		            <a href="/cate-php">
+			<li class="father-li ">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="father-li ">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="father-li ">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="father-li ">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="father-li ">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="father-li ">
+			
+			Web前端</li>
+			</a>
+            
+							
+			<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div>	<div class="mobile" style="height:70px"></div>
+<div class="header-box-mobile mobile">
+	<div class="header-mobile-img">
+		<a href="/"><img src="/logo-no-word.jpg"></a>
+	</div>
+	<div class="header-mobile-btn">
+		<ul class="header-btn-ul">
+			<li class="mobile-search float"></li>
+			<li class="mobile-navbar float"></li>
+		</ul>
+	</div>
+</div>
+<div class="header-box-modal mobile">
+	<div class="header-box-btn">
+	</div>
+	<div class="header-box-right">
+		<ul class="header-box-ul">
+		<a href="/" rel="home">
+		<li class="">
+			首页
+		</li>
+		</a>
+			            <a href="/cate-php">
+			<li class="">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="">
+			
+			Web前端</li>
+			</a>
+            
+						<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div><div class="search-modal mobile">
+	<div class="mobile-close black-close" style="width:20px;height:20px"></div>
+	<div class="mobile-search-form-box">
+		<form class="mb-search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="mb-search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="mb-search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="mb-search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="mb-search-btn" class="btn btn-primary">搜索</button>
+			</form>
+			<script>
+				
+			</script>
+	</div>
+</div><div id="container">
+	
+	<div class="c-left">
+		<div class="section sec1">
+			
+		</div>
+		
+		<div class="section sec2">
+			<div class="section-head">
+				最新文章
+			</div>
+			<div class="section-content">
+				<ul class="index-ul-blog">
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-198.html" target="_blank">
+								<img src="/uploads/images/20200222/b1e2bb74fd2f5526135d11ce7e32edf6.jpg" onerror="this.src='/static/home/images/default.png'" title="深入Redis之 redis常见面试题（十四）" alt="深入Redis之 redis常见面试题（十四）"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-198.html" target="_blank" title="深入Redis之 redis常见面试题（十四）">深入Redis之 redis常见面试题（十四）</a></h2>
+							<div>发布时间:<span>2020-10-10 22:56</span></div>
+							<p>1.Redis有哪些数据结构字符串String、字典Hash、列表List、集合Set、有序集合Zset。除此之外还有：HyperLogLog，Pub/Sub发布订阅，布隆过滤器，Bitmap位图，G</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag41-redis" title="redis" target="_blank">redis</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-197.html" target="_blank">
+								<img src="/uploads/images/20200222/b1e2bb74fd2f5526135d11ce7e32edf6.jpg" onerror="this.src='/static/home/images/default.png'" title="深入Redis之 redis中的内存管理（十三）" alt="深入Redis之 redis中的内存管理（十三）"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-197.html" target="_blank" title="深入Redis之 redis中的内存管理（十三）">深入Redis之 redis中的内存管理（十三）</a></h2>
+							<div>发布时间:<span>2020-10-10 22:50</span></div>
+							<p>一、redis的内存消耗在哪里如何查看redis的内存消耗情况info memory&amp;nbsp;命令每一项的具体意思可以看博客的图片，标红的要重点关注。在我们的印象中，我们都会认为redis占用的内存</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag41-redis" title="redis" target="_blank">redis</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-196.html" target="_blank">
+								<img src="/uploads/images/20200222/b1e2bb74fd2f5526135d11ce7e32edf6.jpg" onerror="this.src='/static/home/images/default.png'" title="深入Redis之 redis中的事务和锁（十二）" alt="深入Redis之 redis中的事务和锁（十二）"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-196.html" target="_blank" title="深入Redis之 redis中的事务和锁（十二）">深入Redis之 redis中的事务和锁（十二）</a></h2>
+							<div>发布时间:<span>2020-10-10 22:47</span></div>
+							<p>一、redis缓存的雪崩、穿透和击穿以电商的缓存数据为例，目前电商首页以及热点数据都会去做缓存 ，一般缓存都是定时任务去刷新，或者是查不到之后去更新的，定时任务刷新就有一个问题。1.缓存雪崩举个简单的</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag41-redis" title="redis" target="_blank">redis</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-195.html" target="_blank">
+								<img src="/uploads/images/20200222/b1e2bb74fd2f5526135d11ce7e32edf6.jpg" onerror="this.src='/static/home/images/default.png'" title="深入Redis之 redis布隆过滤器（十一）" alt="深入Redis之 redis布隆过滤器（十一）"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-195.html" target="_blank" title="深入Redis之 redis布隆过滤器（十一）">深入Redis之 redis布隆过滤器（十一）</a></h2>
+							<div>发布时间:<span>2020-10-08 20:05</span></div>
+							<p>一、引出布隆过滤器
+现在有一个问题：
+现在有50亿过个电话号码，有10万个电话号码，要快速准确判断10万个电话号码是否存在。1.如果通过数据库查询：不能快速查询。
+2.如果是将数据放入r</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag41-redis" title="redis" target="_blank">redis</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-194.html" target="_blank">
+								<img src="/uploads/images/20201008/8f5e79b09a2a02ff0552fc406dd9fb63.jpg" onerror="this.src='/static/home/images/default.png'" title="工具篇：git常用命令和使用" alt="工具篇：git常用命令和使用"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-194.html" target="_blank" title="工具篇：git常用命令和使用">工具篇：git常用命令和使用</a></h2>
+							<div>发布时间:<span>2020-10-08 11:27</span></div>
+							<p>1. 创建一个git仓库(仓库又叫做版本库)：
+仓库有两种：普通仓库和裸仓库
+git init 仓库名
+如git init a&amp;nbsp;
+此时会创建一个a目录，里面有</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag44-git" title="git" target="_blank">git</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-193.html" target="_blank">
+								<img src="/uploads/images/20200222/b1e2bb74fd2f5526135d11ce7e32edf6.jpg" onerror="this.src='/static/home/images/default.png'" title="深入Redis之 redis cluster常见问题 （十）" alt="深入Redis之 redis cluster常见问题 （十）"/>
+								<a class="cate-tag1" href="/cate-linux">Linux</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-193.html" target="_blank" title="深入Redis之 redis cluster常见问题 （十）">深入Redis之 redis cluster常见问题 （十）</a></h2>
+							<div>发布时间:<span>2020-10-07 10:29</span></div>
+							<p>redis集群的故障转移A. 故障发现
+redis集群通过ping/pong消息实现故障发现（redis集群本身自己带有故障转移功能,不需要sentinel），分为主观下线和客观下线。
+</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag41-redis" title="redis" target="_blank">redis</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-192.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(六)  图" alt="数据结构与算法python语言实现(六)  图"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-192.html" target="_blank" title="数据结构与算法python语言实现(六)  图">数据结构与算法python语言实现(六)  图</a></h2>
+							<div>发布时间:<span>2020-06-27 21:49</span></div>
+							<p>图 Graph图的术语：
+1.顶点 Node
+是图的基本组成部分，顶点具有名称标识Key，也可以携带数据项value2.边Edge（也称&amp;ldquo;弧Arc&amp;rdquo;）
+作</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-191.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(五)  树" alt="数据结构与算法python语言实现(五)  树"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-191.html" target="_blank" title="数据结构与算法python语言实现(五)  树">数据结构与算法python语言实现(五)  树</a></h2>
+							<div>发布时间:<span>2020-06-07 20:30</span></div>
+							<p>树树是一种非线性的数据结构，树包含根，枝，叶树的特征：
+1.树是有层次的：越接近顶层的分类越普遍，越接近底层的分类越独特
+2.一个节点的子节点和另一个节点的子节点相互之间是隔离，独</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-190.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(四)  查找和排序" alt="数据结构与算法python语言实现(四)  查找和排序"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-190.html" target="_blank" title="数据结构与算法python语言实现(四)  查找和排序">数据结构与算法python语言实现(四)  查找和排序</a></h2>
+							<div>发布时间:<span>2020-06-01 23:28</span></div>
+							<p>查找算法1.顺序查找
+说白了就是遍历查找。例如：在 [5,1,55,67,32,10,46,100] 中找一个数，找到返回true，否则返回false
+def sequeS</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-189.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(三)  递归" alt="数据结构与算法python语言实现(三)  递归"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-189.html" target="_blank" title="数据结构与算法python语言实现(三)  递归">数据结构与算法python语言实现(三)  递归</a></h2>
+							<div>发布时间:<span>2020-05-27 13:05</span></div>
+							<p>递归就是在函数中调用自身函数递归的精髓在于：将问题分解为规模更小的相同问题一个简单的递归应用：数列求和用循环解决
+&amp;nbsp;
+def listsum(numLis</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-188.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(二)  线性结构" alt="数据结构与算法python语言实现(二)  线性结构"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-188.html" target="_blank" title="数据结构与算法python语言实现(二)  线性结构">数据结构与算法python语言实现(二)  线性结构</a></h2>
+							<div>发布时间:<span>2020-05-18 23:39</span></div>
+							<p>最基本的几种线性结构为：
+栈 &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; stack
+队列 &amp;nbsp; &amp;nbsp; &amp;nbsp; Queue
+双向队列 &amp;nbsp; &amp;nbsp;</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-187.html" target="_blank">
+								<img src="/uploads/images/20200517/2e2135b6b46ea86dc4f1b2950196e581.jpg" onerror="this.src='/static/home/images/default.png'" title="数据结构与算法python语言实现(一)  算法分析" alt="数据结构与算法python语言实现(一)  算法分析"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-187.html" target="_blank" title="数据结构与算法python语言实现(一)  算法分析">数据结构与算法python语言实现(一)  算法分析</a></h2>
+							<div>发布时间:<span>2020-05-17 23:46</span></div>
+							<p>分析算法的好坏主要是从计算机资源消耗的角度来评判的如果一个算法能更高效的利用计算资源，或者更少的占用计算机资源就是更好的算法。
+这里说的计算机资源是指：
+1.存储空间(内存空间和辅</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag43-数据结构与算法" title="数据结构与算法" target="_blank">数据结构与算法</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-186.html" target="_blank">
+								<img src="/uploads/images/20191029/2ba4bda8a023568f9e35c32edff5da4b.jpg" onerror="this.src='/static/home/images/default.png'" title="Python多线程和多进程（六）  多进程编程和同步" alt="Python多线程和多进程（六）  多进程编程和同步"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-186.html" target="_blank" title="Python多线程和多进程（六）  多进程编程和同步">Python多线程和多进程（六）  多进程编程和同步</a></h2>
+							<div>发布时间:<span>2020-04-11 14:48</span></div>
+							<p>多进程编程多进程和多线程对比：
+1.由于python有GIL锁，而且是一个进程管理着1把GIL锁，所以多线程无法使用多核，即同一时刻只能一个线程在运行。
+而多进程编程可以使用多核。意味着，</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-185.html" target="_blank">
+								<img src="/uploads/images/20191029/2ba4bda8a023568f9e35c32edff5da4b.jpg" onerror="this.src='/static/home/images/default.png'" title="Python多线程和多进程（五）  多线程管理&mdash;&mdash;线程池" alt="Python多线程和多进程（五）  多线程管理&mdash;&mdash;线程池"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-185.html" target="_blank" title="Python多线程和多进程（五）  多线程管理&mdash;&mdash;线程池">Python多线程和多进程（五）  多线程管理&mdash;&mdash;线程池</a></h2>
+							<div>发布时间:<span>2020-04-11 14:28</span></div>
+							<p>多线程管理 - 线程池Q1：首先，为什么需要线程池？
+因为我们希望能够保持一定数量的并发线程处于执行状态，让处于执行状态的线程数不至于太少也不至于太多，提高任务执行效率。Q2：信号量</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+										<li class="item-blog">
+						<div class="blog-img pc inline-block">
+							<a href="/blog-184.html" target="_blank">
+								<img src="/uploads/images/20191029/2ba4bda8a023568f9e35c32edff5da4b.jpg" onerror="this.src='/static/home/images/default.png'" title="Python多线程和多进程（四） 线程同步之信号量" alt="Python多线程和多进程（四） 线程同步之信号量"/>
+								<a class="cate-tag1" href="/cate-python">Python</a>
+							</a>
+						</div>
+						<div class="blog-info inline-block">
+							<h2 class="blog-h2"><a href="/blog-184.html" target="_blank" title="Python多线程和多进程（四） 线程同步之信号量">Python多线程和多进程（四） 线程同步之信号量</a></h2>
+							<div>发布时间:<span>2020-04-11 13:37</span></div>
+							<p>同步方式3：信号量 semaphore
+信号量是用于控制并发线程数量的锁。还是以爬虫为例子。你可能有这么个需求：列表页爬到很多的详情页，我想对每个详情页开一个线程来爬。
+但是如果1</p>
+							
+							<div class="art-tags-box">
+								<ul class="art-tags-ul">
+																<i class="icon tag-icon"></i>
+																	<li class="float art-tags-li"><a href="/tag9-理论技巧" title="理论技巧" target="_blank">理论技巧</a></li>
+																	<li class="float art-tags-li"><a href="/tag1-Python" title="Python" target="_blank">Python</a></li>
+																</ul>
+								
+							</div>
+						</div>
+					</li>
+									</ul>
+				
+				<div data-page="1" class="more-blogs btn btn-primary" style="width:100%;margin-top:20px">
+					更多文章
+				</div>
+			</div>
+		</div>
+		
+	</div>	<div class="c-right">
+		<div class="section-head">
+			热门推荐
+		</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐文章
+	</div>
+	<ul class="right-ul">
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-123.html" target="_blank">Python数据可视化（一） matplotlib,seaborn,pandas绘制折线图和饼图</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-107.html" target="_blank">Python数据分析小案例&mdash;&mdash;红楼梦文本分析（三） KMeans聚类</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-32.html" target="_blank">Python初级爬虫实战（一）之爬取图片网的图片</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-110.html" target="_blank">爬虫进阶之Scrapy（七） 使用selenium模拟浏览器动态爬取</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-29.html" target="_blank">Python爬虫入门（二） 使用BeautifulSoup解析网页内容</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-27.html" target="_blank">Python爬虫入门（一） 使用requests模块获取网页</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-26.html" target="_blank">Python教程之使用pymysql操作Mysql数据库</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-161.html" target="_blank">深入Redis之  Redis的五种基本数据类型和使用场景 （一）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-134.html" target="_blank">Mysql进阶之Mycat中间件（二） mycat的标签详解</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-133.html" target="_blank">Mysql进阶之Mycat中间件（一） mycat的安装和初步使用</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-122.html" target="_blank">python+selenium模拟百度搜索并点击链接</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-83.html" target="_blank">爬虫进阶之Scrapy（一） scrapy框架安装（Windows端，Centos和Ubantu）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-102.html" target="_blank">Python数据分析基础（九） 使用Seaborn绘制图像</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-150.html" target="_blank">Nginx HTTP模块篇 access阶段的deny allow auth_basic auth_request指令 (十三)</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-105.html" target="_blank">Python数据分析小案例&mdash;&mdash;红楼梦文本分析（一） 文本预处理</a>
+		</li>
+		</ul>
+</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐新闻
+	</div>
+	<ul class="right-ul">
+		</ul>
+</div>
+					<div class="right-content">
+	<div class="right-head">
+		相关博客标签
+	</div>
+	<ul class="right-ul">
+			<a href="/tag15-Vue" target="_blank">
+		<li class="tags-li">
+			<b>Vue</b><div class="hot-tags"></div>		</li>
+		</a>
+			<a href="/tag14-PHP基础" target="_blank">
+		<li class="tags-li">
+			<b>PHP基础</b><div class="hot-tags"></div>		</li>
+		</a>
+			<a href="/tag9-理论技巧" target="_blank">
+		<li class="tags-li">
+			<b>理论技巧</b><div class="hot-tags"></div>		</li>
+		</a>
+			<a href="/tag10-实战练习" target="_blank">
+		<li class="tags-li">
+			<b>实战练习</b><div class="hot-tags"></div>		</li>
+		</a>
+			<a href="/tag39-Nginx" target="_blank">
+		<li class="tags-li">
+			<b>Nginx</b>		</li>
+		</a>
+			<a href="/tag21-数据分析" target="_blank">
+		<li class="tags-li">
+			<b>数据分析</b>		</li>
+		</a>
+			<a href="/tag40-php-fpm" target="_blank">
+		<li class="tags-li">
+			<b>php-fpm</b>		</li>
+		</a>
+			<a href="/tag3-Mysql" target="_blank">
+		<li class="tags-li">
+			<b>Mysql</b>		</li>
+		</a>
+			<a href="/tag42-操作系统原理" target="_blank">
+		<li class="tags-li">
+			<b>操作系统原理</b>		</li>
+		</a>
+			<a href="/tag18-微信小程序" target="_blank">
+		<li class="tags-li">
+			<b>微信小程序</b>		</li>
+		</a>
+		</ul>
+</div>					<div class="right-content right-tags-content">
+	<div class="right-head">
+		相关资讯标签
+	</div>
+	<ul class="right-ul">
+		</ul>
+</div>
+			</div>
+        
+    <div class="c-all">
+    <br/>
+    <br/>
+    
+    </div>
+</div>
+<div style="clear:both;"></div>
+<div id="footer">
+	<div class="footer-inner">
+		<div class="footer-logo">
+			<a href="/" rel="home">
+				<img src="/logo.jpg" title="" alt=""/>
+			</a>
+		</div>
+		<div class="footer-cate pc">
+			<ul>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-php" target="blank">PHP</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-python" target="blank">Python</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-seo" target="blank">SEO优化</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-linux" target="blank">Linux</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-mysql" target="blank">MySQL</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-web" target="blank">Web前端</a>
+					</li>
+								<li class="footer-cate-li float">
+					<a href="/about" target="blank">关于作者</a>
+				</li>
+			</ul>
+			
+			
+		</div>
+		
+	</div>
+	<center id="ba">张柏沛的个人IT技术博客 © www.zbpblog.com - <a href="http://beian.miit.gov.cn" target="_blank">粤ICP备19143107号</a><br/><a href="/sitemap.xml" title="网站地图" target="_blank">网站地图</a></center>
+	
+</div><script type="text/javascript" src="/statics/js/jquery.lazyload.js"></script>
+<script type="text/javascript" src="/statics/js/main.js"></script></body>
+</html>

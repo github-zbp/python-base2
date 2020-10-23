@@ -1,0 +1,812 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>数据结构与算法python语言实现(四)  查找和排序-张柏沛IT博客</title>
+    <meta name="keywords" content="数据结构,算法,python,查找,排序" />
+	<meta name="description" content="查找算法1.顺序查找说白了就是遍历查找。例如：在 [5,1,55,67,32,10,46,100] 中找一个数，找到返回true，否则返回falsedef se" />
+	<meta charset="UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/statics/css/main.css"/>
+	<script type="text/javascript" src="/statics/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+   <script> 
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?4898023a3a963db158d0eeee27c56c80";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script></head><body>
+<div class="header-box  pc">
+	<div class="header-inner">
+		<h1 class="header-logo">
+			<a href="/" rel="home"><img src="/logo.jpg" alt="数据结构与算法python语言实现(四)  查找和排序-张柏沛IT博客" title="数据结构与算法python语言实现(四)  查找和排序-张柏沛IT博客" /></a>
+		</h1>
+		<div class="search-box">
+			<form class="search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="search-btn" class="btn btn-primary">搜索</button>
+			</form>
+		</div>
+	</div>
+	
+	<div class="header-cate">
+		<ul id="header-cate-ul">
+		<a class="top-cate-a" href="/">
+		<li class="father-li float">
+			首页
+		</li>
+		</a>
+		            <a href="/cate-php">
+			<li class="father-li ">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="father-li active">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="father-li ">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="father-li ">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="father-li ">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="father-li ">
+			
+			Web前端</li>
+			</a>
+            
+							
+			<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div>	<div class="mobile" style="height:70px"></div>
+<div class="header-box-mobile mobile">
+	<div class="header-mobile-img">
+		<a href="/"><img src="/logo-no-word.jpg"></a>
+	</div>
+	<div class="header-mobile-btn">
+		<ul class="header-btn-ul">
+			<li class="mobile-search float"></li>
+			<li class="mobile-navbar float"></li>
+		</ul>
+	</div>
+</div>
+<div class="header-box-modal mobile">
+	<div class="header-box-btn">
+	</div>
+	<div class="header-box-right">
+		<ul class="header-box-ul">
+		<a href="/" rel="home">
+		<li class="">
+			首页
+		</li>
+		</a>
+			            <a href="/cate-php">
+			<li class="">
+			
+			PHP</li>
+			</a>
+            
+				            <a href="/cate-python">
+			<li class="active">
+			
+			Python</li>
+			</a>
+            
+				            <a href="/cate-seo">
+			<li class="">
+			
+			SEO优化</li>
+			</a>
+            
+				            <a href="/cate-linux">
+			<li class="">
+			
+			Linux</li>
+			</a>
+            
+				            <a href="/cate-mysql">
+			<li class="">
+			
+			MySQL</li>
+			</a>
+            
+				            <a href="/cate-web">
+			<li class="">
+			
+			Web前端</li>
+			</a>
+            
+						<a href="/about">
+			<li class="father-li">
+			
+			关于作者</li>
+			</a>
+		</ul>
+	</div>
+</div><div class="search-modal mobile">
+	<div class="mobile-close black-close" style="width:20px;height:20px"></div>
+	<div class="mobile-search-form-box">
+		<form class="mb-search-form" action="/search" method="get">
+			<input type="hidden" value="" name="search_type" id="mb-search-type-input">
+			<div class="form-group">
+			<select class="form-control" id="mb-search-select" name="search_select" style="border-radius:0">
+			  <option value="blogs" type="1" >博客文章</option>
+			  <option value="blogs" type="2" >模板源码</option>
+			  <option value="blogs" type="3" >视频教程</option>
+			  <option value="article" type="">新闻资讯</option>
+			</select>
+			</div>
+			  <div class="form-group">
+				<input style="border-radius:0" name="kw" value="" type="text" class="form-control" id="mb-search-input" placeholder="搜索关键词">
+			  </div>
+			  
+			  <button type="submit" id="mb-search-btn" class="btn btn-primary">搜索</button>
+			</form>
+			<script>
+				
+			</script>
+	</div>
+</div><link rel="stylesheet" type="text/css" href="/statics/modal/css/jquery.my-modal.1.1.winStyle.css" />    <!-- 模态框的css -->
+<script type="text/javascript" src="/statics/modal/js/jquery.my-modal.1.1.js"></script>		<!-- 模态框的js -->
+<link rel="stylesheet"
+      href="/statics/css/zenburn.css" type="text/css">
+<script src="/statics/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<div id="container" data-id="190">
+	<div id="breadcrumb">
+		所在位置：<a href="/">首页</a> > <a href="/cate-python">Python</a> > <span>数据结构与算法python语言实现(四)  查找和排序</span>	</div>
+	 
+	<div class="c-left">
+		<div class="section-head">
+			正文内容
+		</div>
+		<div id="blog-art-box">
+			<div id="blog-art-head">
+				<h1>数据结构与算法python语言实现(四)  查找和排序</h1>
+			</div>
+			<div id="blog-art-info">
+				<span>栏目：<a href="/cate-python">Python</a></span>
+				<span>发布时间：2020-06-01 23:28</span>
+				<span>浏览量：280</span>
+			</div>
+			<div class="blog-art-cont">
+			<div class="cont">
+				<p><span style="font-size:20px"><strong>查找算法</strong></span></p><p><span style="font-size:14px"><strong>1.顺序查找</strong><br />
+说白了就是遍历查找。</span></p><p><span style="font-size:14px">例如：在 [5,1,55,67,32,10,46,100] 中找一个数，找到返回true，否则返回false</span></p><pre>
+<code class="language-python">def sequeSearch(items,value):
+    i = 0
+    while i&lt;len(items):
+        if items[i] == value:
+            return True
+        i += 1    return Falselist1 = [5,1,55,67,32,10,46,100]
+print(sequeSearch(list1,32))
+print(sequeSearch(list1,33))</code></pre><p><span style="font-size:14px">这是最简单也最符合逻辑的一种查找算法。复杂度为O(n)。</span></p><p><span style="font-size:14px">分析如下：<br />
+如果找不到，则需要遍历n次。<br />
+如果能找到，最少要遍历1次，最多要遍历n次，平均遍历n/2次</span></p><p><br />
+<span style="font-size:14px">上面是对一个无序的列表进行查找，如果是对一个有序列表查找例如<br />
+[1, 5, 10, 32, 46, 55, 67, 100]</span></p><pre>
+<code class="language-python">def sequeSearch(items,value):
+    i = 0
+    while i&lt;len(items):
+        if items[i] == value:
+            return True
+        elif items[i] &gt; value:
+            return False
+        i += 1    return Falselist1 = [5,1,55,67,32,10,46,100]
+list1 = sorted(list1)
+print(sequeSearch(list1,32))
+print(sequeSearch(list1,33))</code></pre><p><span style="font-size:14px">就比无序列表查找多了两行，判断遍历到的数是否比要查找的数大，如果是则不用再查下去了。</span></p><p><span style="font-size:14px">如果找不到，最少要遍历1次，最多要遍历n次，平均遍历n/2次。<br />
+如果能找到，最少要遍历1次，最多要遍历n次，平均遍历n/2次</span></p><p><span style="font-size:14px">但是就数量级而言，还是O(n)</span></p><p><span style="font-size:14px">所以排序后进行查找的性能比无序列表好一些，但是两者的数量级都是一样的。</span></p><p><br />
+<span style="font-size:14px"><strong>2. 二分查找</strong></span></p><p><span style="font-size:14px">这是一个针对有序列表的查找方法。可以利用有序表的特性缩小查找的范围。</span></p><p><span style="font-size:14px">其原理是：<br />
+先从列表的中间直接查找，如果要找的数value大于这个中间值middle，那么就往右边那一半的列表找，否则就往左边那一半找，这样查找范围就缩小了一半。然后重复这个过程知道找到位置。</span></p><p><span style="font-size:14px">下面提供二分查找的两个版本：遍历版和递归版# 遍历版二分查找</span></p><pre>
+<code class="language-python">def binarySearch(aList,value):
+    while len(aList) &gt; 0:
+        mid = len(aList) // 2
+        midVal = aList[mid]        if midVal &gt; value:
+            aList = aList[:mid]
+        elif midVal &lt; value:
+            aList = aList[mid + 1:]
+        else:
+            return True    return Falseif __name__ == "__main__":
+    list1 = [5,1,55,67,32,10,46,100,9]
+    list1 = sorted(list1)
+    print(list1)
+    print(binarySearch(list1,1))
+    print(binarySearch(list1,33))
+    
+    </code></pre><p><br />
+<span style="font-size:14px">&nbsp;&nbsp; &nbsp;</span></p><p><span style="font-size:14px"># 递归版二分查找</span></p><pre>
+<code class="language-python">def binarySearch(aList,value):
+    if len(aList) == 0:
+        return False    mid = len(aList) // 2
+    midVal = aList[mid]    if midVal &gt; value:
+        aList = aList[:mid]
+    elif midVal &lt; value:
+        aList = aList[mid+1:]
+    else:
+        return True    return binarySearch(aList,value)</code></pre><p><br />
+<span style="font-size:14px">二分查找的性能<br />
+每次递归或者循环后，查找的范围都缩小了一半，第一次是 n/2 第二次是 n/4 第i次是 n/2^i &nbsp;<br />
+计算得到递归 i次后查找次数为 log2(n)<br />
+所以二分查找的 时间复杂度为 O(log2(n))</span></p><p><span style="font-size:14px">但是二分查找不一定比顺序查找好，因为二分查找是针对排好序的列表，而排序也是要消耗时间的。</span></p><p><span style="font-size:14px">如果一次排序号可以进行多次查找，那么排序的开销可以摊薄。此时用二分查找比较好。<br />
+如果数据经常变动，查找次数比较少，用顺序查找更经济。</span></p><p><span style="font-size:14px">所以，算法的选择不能光看时间复杂度，还要看实际情况</span></p><p><span style="font-size:14px">二分查找的本质是分治策略。</span></p><p>&nbsp;</p><p><span style="font-size:14px">上面的两种写法还有一定的缺陷：上面使用了列表切片功能，python的列表切片的时间复杂度是 O(k)，所以可以进一步改进为不使用列表切片</span></p><pre>
+<code class="language-python"># 遍历版
+def binarySearch(aList,value):
+    start = 0
+    end = len(aList) - 1    while start &lt;= end:     # 可以允许start等于end，但是一旦start大于end说明列表中没有对应的值
+        mid = (start + end) // 2
+        midVal = aList[mid]        if midVal &gt; value:
+            end = mid - 1
+        elif midVal &lt; value:
+            start = mid + 1
+        else:
+            return True    return False# 递归版
+import sys
+def binarySearch(aList,value,start=0,end=sys.maxsize):
+    end = end if end != sys.maxsize else len(aList) - 1    if start &gt; end:
+        return False    mid = (start + end) // 2
+    midVal = aList[mid]    if midVal &gt; value:
+        end = mid - 1
+    elif midVal &lt; value:
+        start = mid + 1
+    else:
+        return True    return binarySearch(aList,value,start,end)</code></pre><p>&nbsp;</p><p>&nbsp;</p><p><span style="font-size:14px"><span style="display:none">&nbsp;</span><span style="display:none">&nbsp;</span></span></p><p><span style="font-size:20px"><strong>排序算法</strong></span><span style="display:none">&nbsp;</span></p><p><span style="font-size:14px"><strong>1.冒泡排序<span style="display:none">&nbsp;</span></strong><br />
+冒泡排序的思路是：对无序表进行多趟比较交换。每一趟比较就会将本趟的最大值就位到列表尾部。经过n-1趟后列表整体就排序好了。</span></p><p><span style="font-size:14px">这也是最直观的排序方法。</span></p><p><span style="font-size:14px">第一趟会遍历n-1次，第二趟会遍历n-2次，以此类推。<br />
+每一趟只要经过本趟最大值，这个最大值就会跟着排到列表尾部</span></p><pre>
+<code class="language-python">def bubbleSort(alist):
+    for j in range(1,len(alist)):
+        left = len(alist) - j
+        for i in range(left):
+            if alist[i] &gt; alist[i+1]:
+                temp = alist[i+1]
+                alist[i+1] = alist[i]   # 这三句可以写为语句 alist[i+1],alist[i] = alist[i],alist[i+1] 这是优雅的python独有的
+                alist[i] = temp    return alist</code></pre><p><br />
+<span style="font-size:14px">&nbsp; &nbsp;&nbsp;<br />
+算法分析：<br />
+遍历次数为 n(n-1)/2 ，时间复杂度为 O(n^2)</span></p><p><span style="font-size:14px">记住，一共要进行n-1趟遍历，第i趟要交换 n-i</span></p><p><span style="font-size:14px">冒泡排序是性能最差的排序算法，但是无需额外的存储空间开销。</span></p><p><br />
+<span style="font-size:14px">我们可以对冒泡算法进行改进，改进思路如下：<br />
+原本的冒泡算法是每一趟都要进行该趟内所有元素的交换。会不会存在这样一种情况：<br />
+要进行10趟遍历，但是3趟下来元素就已经排好了，第四趟的时候发现一个元素都没有进行交换，那么后面6趟就没有必要进行交换了。</span></p><pre>
+<code class="language-python">def shortbubleSort(alist):
+    for j in range(1,len(alist)):
+        left = len(alist) - j
+        exchange = False
+        for i in range(left):
+            if alist[i] &gt; alist[i+1]:
+                alist[i+1],alist[i] = alist[i],alist[i+1]
+                exchange = True     # 表示发生了交换        if not exchange:    # 如果一趟下来没有元素发生交换就不用进行之后几趟的排序
+            break    return alist</code></pre><p><br />
+<span style="font-size:14px">优化后的冒泡排序性能有所提升，但数量级还是 O(n^2)</span><br />
+&nbsp;</p><p><span style="font-size:14px"><strong>2.选择排序</strong><br />
+选择排序的思路和冒泡排序一样要遍历多趟，每一趟都要进行元素之间的大小比对，但是选择排序在本趟结束前不需要进行交换，而是在元素比对完之后记下本趟的最大值再一次性交换。</span></p><pre>
+<code class="language-python">def selectionSort(alist):
+    for j in range(1,len(alist)):
+        left = len(alist) - j
+        max_index = 0
+        for i in range(left):   # 一趟下来就可以找到本趟中最大的数的下标
+            if alist[max_index] &lt; alist[i+1]:
+                max_index = i+1        alist[max_index],alist[left] = alist[left],alist[max_index]     # 每趟只做一次交换    return alist</code></pre><p><br />
+<span style="font-size:14px">&nbsp; &nbsp;&nbsp;<br />
+所以选择排序的比对次数的复杂度还是 O(n^2)<br />
+但是交换次数的复杂度只有 O(n)</span></p><p><span style="font-size:14px">冒泡排序每趟交换多次<br />
+选择排序每趟交换仅一次<br />
+但冒泡排序和选择排序的思维是一样的，比对的时间复杂度也是一样的。</span><br />
+&nbsp;</p><p>&nbsp;</p><p><span style="font-size:14px"><strong>3.插入排序</strong><br />
+插入排序有点类似于打扑克牌的时候整理扑克牌的过程，左边的是排好序的牌，右边的是没有排好序的牌。我要将右边牌一张张的插入到左边的牌。</span></p><p><span style="font-size:14px">它的思路如下：<br />
+创建一个空列表A，遍历要排序的列表B。<br />
+将要排序的列表B里面的元素一个个的放到空列表A中，放的时候会将这个元素与A中的元素一一比对再插入。</span></p><pre>
+<code class="language-python">def insertionSort(alist):
+    sortedList = []    for aitem in alist:
+        if len(sortedList) == 0:
+            sortedList.append(aitem)
+            continue        inserted = False
+        for index in range(len(sortedList)):
+            if sortedList[index] &gt; aitem:
+                sortedList.insert(index,aitem)
+                inserted = True
+                break        if not inserted:
+            sortedList.append(aitem)
+    return sortedList
+    </code></pre><p><br />
+<span style="font-size:14px"># 更优雅的写法</span></p><pre>
+<code class="language-python">def insertSort(aList):
+    newList = []    while len(aList):
+        lastVal = aList.pop()        inserted = False
+        for i in range(len(newList)):
+            if newList[i] &gt; lastVal:
+                newList.insert(i,lastVal)
+                inserted = True
+                break        if not inserted:
+            newList.append(lastVal)    return newList
+    </code></pre><p><br />
+<span style="font-size:14px">这样写的话数量级看上去是O(n^2) 但是 insert方法是 O(n)，所以实际上数量级是 O(n^3)，而且上面还多创建了一个列表用于存储元素，使用了更多的内存。</span></p><p><br />
+<span style="font-size:14px">下面是改进的写法<br />
+我们只用一个列表，就是要排序的列表本身。<br />
+思路如下：还是要遍历n-1趟 ，第一趟比较前两个元素，如果逆序则交换<br />
+第二趟比较前三个元素，将第三个元素和前两个比较大小，根据比较结果进行插入或者不变。<br />
+第三趟比较前四个元素，将第4个元素和前3个比较大小，根据比较结果进行插入或者不变。</span></p><p><span style="font-size:14px">所以 第 i 趟，会比较前i个元素的大小，并将第i个元素插入到适当的位置。</span></p><pre>
+<code class="language-python">def newInsertionSort(alist):
+    for index in range(1,len(alist)):
+        currentValue = alist[index]
+        insertedIndex = index   # 未排序的某元素要插入的位置
+        while insertedIndex &gt; 0 and currentValue &lt; alist[insertedIndex-1]:
+            # 当第 index 个元素（未排序的元素）比左边已排序的某元素小，将已排序的这个元素搬到后一位，并将要插入的位置设为前一位
+            alist[insertedIndex] = alist[insertedIndex - 1]
+            insertedIndex -= 1        alist[insertedIndex] = currentValue  # 将未排序的元素插入到要插入的位置    return alist</code></pre><p><br />
+<span style="font-size:14px">其复杂度为 O(n^2) 但是交换次数较少所以性能比冒泡排序好一些</span></p><p>&nbsp;</p><p><br />
+<span style="font-size:14px"><strong>5. 归并排序</strong><br />
+是分治策略在排序中的一个很好的应用。</span></p><p><span style="font-size:14px">归并算法是一个递归算法，具体思路如下：<br />
+将一个无序列表分成左右两半，再对左右两个列表调用函数递归处理。<br />
+递归结束的条件是检测到传入的列表的元素个数为1<br />
+处理好的两个列表已经是排好序的两个列表，最后我们要合并这两个列表得到一个完整的排好序的列表。<br />
+采用的方式是拉链式合并：先创建一个空列表A，将两个列表中的头部的元素pop出来进行比较，谁小谁就先append进入这个列表A中。<br />
+如果一个列表的所有元素全部pop出来了，剩下一个列表的所有元素直接压进列表A即可。</span></p><pre>
+<code class="language-python"># 归并排序
+def mergeSort(alist):
+    if len(alist) &lt;=1:
+        return alist    mid = len(alist) // 2
+    left = mergeSort(alist[:mid])
+    right = mergeSort(alist[mid:])    newList = []
+    while left and right:   # 当两个列表都不为空时，则将两个列表中的元素拉链式append进newList中
+        if left[0] &lt;= right[0]:
+            newList.append(left.pop(0))
+        else:
+            newList.append(right.pop(0))    newList.extend(left if left else right)     # 如果left还有剩余元素则将left的剩余元素压入newList;否则就是right还有剩余元素，此时将right剩余元素压入newList    return newListif __name__ == "__main__":
+    list1 = [5,1,55,67,32,10,46,100,9]
+    print(mergeSort(list1))</code></pre><p><span style="font-size:14px">归并排序分析：<br />
+整个过程分为两部分：分裂和归并<br />
+分裂的过程是调用了递归，每递归1次，传入列表的元素个数就少了一半。所以每次处理的元素个数是 n/2^i,总的处理元素个数的数量级是O(logn)<br />
+归并的过程是将left或者right中长度小的遍历了一遍，时间复杂度为O(n)</span></p><p><span style="font-size:14px">总的时间复杂度是 O(nlogn) &lt; O(n^2)</span></p><p><span style="font-size:14px">但是归并算法使用了额外1倍的存储空间用于归并（就是在合并的过程使用了一个newList存储）<br />
+所以对特大数据集进行排序的时候要考虑到内存空间的问题。</span></p><p>&nbsp;</p><p><span style="font-size:14px"><strong>6. 快速排序</strong><br />
+思路是找到无序列表的中值（就是中位数），然后把比中位数小的元素放到一个列表A，比中位数大的元素放到另一个列表B。然后对这两个列表进行递归调用函数。<br />
+结束条件是传入的函数只有一个元素。<br />
+递归完了之后，就是合并：按照 A--中位数--B 的方式连起来就是一个完整的排好序的列表</span></p><p><span style="font-size:14px">但是有一点：中位数的计算要额外的开销。所以我们不去计算中位数，而是取元素的第一个或者最后一个元素作为这个中值</span></p><pre>
+<code class="language-python"># 快速排序
+def quickSort(alist):
+    if len(alist) &lt;= 1:
+        return alist    mid = alist.pop()
+    left = []
+    right = []    while len(alist):
+        item = alist.pop()
+        if item&gt;mid:
+            right.append(item)
+        else:
+            left.append(item)    left = quickSort(left)
+    right = quickSort(right)    return left+[mid]+right</code></pre><p><br />
+<span style="font-size:14px">快速排序的时间复杂度是 O(nlogn)。中值的选取直接决定了快排的性能。如果中值刚好选中了最大值或者最小值，那么时间复杂度直接上升到 O(n^2)</span><br />
+&nbsp;</p><p><span style="font-size:14px">==================================================================</span></p><p><span style="font-size:20px"><strong>散列 &nbsp;Hashing</strong></span><br />
+<span style="font-size:14px">散列是一种新的数据结构，他能够使查找算法的复杂度直接降到O(1)</span></p><p><span style="font-size:14px">其实它的原理很简单：只要事先知道某一个数据项在哪一个位置，我们直接从这个下标位置获取这个数即可。</span></p><p><span style="font-size:14px">散列表又称为哈希表。哈希表的设计就是为了快速查找定位。<br />
+哈希表的每一个存储位置成为槽(slot)，每一个槽用来存放一个数据，每一个槽有唯一一个名称（其实就是key和value）</span></p><p><span style="font-size:14px">散列表如何实现查找时复杂度为 O(1)</span></p><p><span style="font-size:14px">实现如下：<br />
+一开始哈希表中所有槽存的数据都是None。</span></p><p><span style="font-size:14px">接下来开始存数据：<br />
+首先数据存在哈希表中的时候，用数据对哈希表长度取余决定这个数据存在哪个槽里面。数据值和该数据所放的槽号的映射关系由一个散列函数实现，这个散列函数里面的算法就是简单的取余而已。散列函数返回的是这个数据对哈希表长度的余数，也就是槽号。</span></p><p><span style="font-size:14px">数据查找的时候，只需要将这个数据放到散列函数中计算该数据的槽号。得到槽号之后只需要简单的列表获取元素的操作即可（就是 list[槽号] 即可），如果取到的元素是None说明该数据不再表中。</span></p><p><span style="font-size:14px">用简单的几行代码描述这个过程就是<span style="display:none">&nbsp;</span><span style="display:none">&nbsp;</span><br />
+# 存储过程<br />
+a[xxx] = value1<br />
+a[xxx] = value2<br />
+a[xxx] = value3</span></p><p><span style="font-size:14px"># 查找过程 O(1)<br />
+slot = getRemain(value1) &nbsp; &nbsp;# 取value1的余数（即槽）<br />
+print(a[slot]==None)</span></p><p><span style="font-size:14px">当然，这个算法是由漏洞的，如果要存入哈希表中的多个数据对哈希表的长度取余的结果一样，那么这多个数据都应该放在一个槽里面，但一个槽只能放一个元素。这个就是散列表的&ldquo;冲突&rdquo;问题。</span></p><p><span style="font-size:14px">例如：一个长度为10的列表，保存10,20,30,40 这四个数据，会发现他们余数都是0，都保存在下标为0的槽中，这样就发生了冲突。</span></p><p><span style="font-size:14px">如何解决这个&ldquo;冲突&rdquo;问题？<br />
+两方面：1.扩大存储空间容量 &nbsp;2.使用比取余更好的散列算法<br />
+法1： 还是上面10,20,30,40的例子，我将列表的大小设为40，这样取余数得到的槽点也刚好是10,20,30,40<br />
+法2：还是上面的例子，如果我不是用取余这个算法，而是使用md5这样的算法，计算出来的槽点肯定就不一样了。此时下标就不是数字而是字符串。</span></p><p><br />
+<span style="font-size:14px">这两个方法可以解决冲突的问题，但是前者是以牺牲存储空间为代价，后者增加运行时间为代价（因为算法更复杂了，时间复杂度增加）</span></p><p><span style="font-size:14px">完美散列函数：<br />
+为了解决这个问题，需要有比取余更好的计算槽点函数。我们可以把计算槽点的函数叫做散列函数。散列函数返回值称作散列值。<br />
+那么取余就是一种简单的散列函数，返回的余数就是散列值。但是取余这种散列函数会出现上面所述的冲突的问题。</span></p><p><span style="font-size:14px">一个完美的散列函数是可以做到无论你传入什么数，返回出来的散列值都是不同的（具有唯一性），这样就可以完美的做到槽点不会冲突。</span></p><p><span style="font-size:14px">完美散列函数要有以下特性：<br />
+1.压缩性： 任意长度的数据，经过散列函数处理后得到的散列值的长度是固定的<br />
+2.易计算：<br />
+从原数据计算散列值很容易，从散列值逆推回原数据几乎不可能（单向加密）<br />
+3.抗修改性：<br />
+对原数据的微小变动会引起散列值的大改变<br />
+4.抗冲突性：<br />
+也就是唯一性，得到的散列值都会是不同的，唯一的</span></p><p><span style="font-size:14px">最著名的近似完美的散列函数就是 MD5 和 SHA系列函数<br />
+其中md5得到的散列值是128位的，sha1得到的散列值是160位的，所以sha1比md5更不容易得到重复的散列值</span></p><p><span style="font-size:14px">python中自带md5和sha的库：hashlib</span></p><p><span style="font-size:14px">from hashlib import md5&nbsp;<br />
+print(md5(b&quot;hello world!&quot;).hexdigest()) &nbsp; &nbsp; &nbsp; &nbsp; #fc3ff98e8c6a0d3087d515c0473f8677<br />
+print(sha1(b&quot;hello world!&quot;).hexdigest()) &nbsp; &nbsp;# 430ce34d020724ed75a196dfc2ad67c77772d169</span></p><p><span style="font-size:14px">或者这样使用：<br />
+m = md5()<br />
+m.update(b&quot;hello world!&quot;)<br />
+print(m.hexdigest())</span></p><p><span style="font-size:14px">注意：传入md5和sha1中的参数必须是encode编码后的字符，所以要用b这种类型（byte类型）</span></p><p><br />
+<span style="font-size:14px">完美散列函数的应用：<br />
+1.对比两个文件内容一致性<br />
+如果用正常的方法比较两个文件内容是否相同，就要读取两个文件的内容，然后遍历里面的每一个字符，一一对比。<br />
+但是这样效率很低，如果文件有几个G就会很久</span></p><p><span style="font-size:14px">所以换个思路，我们不用比较它们原文是否一致，只需比较它们的散列值是否一致，散列值的大小只有几十个字节，比几个G的内容好比较很多。</span></p><p><span style="font-size:14px">这个可以用于防文件篡改</span></p><p><span style="font-size:14px">2.用于文件分享系统（网盘）<br />
+例如 A用户上传了一部2G的电影，B用户上传了一部相同的电影，这么一来会占用4G空间。<br />
+如果网盘检测B用户上传电影（文件内容）的散列值是否在网盘中已存在，发现A用户的一个文件的散列值刚好和B用户上传的文件内容的散列值相同，此时就无需将B的文件传输到网盘，只是直接将链接指向A用户的文件即可。<br />
+这么一来大大节省了磁盘空间。</span></p><p><span style="font-size:14px">3.密码加密<br />
+这个很常用，用户注册的时候将明文密码用md5或者sha1进行加密，将散列值存入数据库。用户登录的时候，将明文密码用md5或者sha1进行加密得到的散列值再和数据库中存的密码的散列值对比。</span></p><p><span style="font-size:14px">4.区块链技术<br />
+是散列函数最酷的应用</span></p><p><br />
+<span style="font-size:14px">散列函数设计<br />
+下面介绍几种简单的散列函数设计</span></p><p><span style="font-size:14px">A. 针对数字<br />
+1.折叠法<br />
+将数据按照位数分为若干段，将几段数字相加，对散列表大小取余得到散列值。<br />
+例如 电话号码：62767255<br />
+可以按两位分为4段 62 76 72 55&nbsp;<br />
+相加得到 265</span></p><p><span style="font-size:14px">假如存入的是一个11个槽的长度的表中：<br />
+265 % 11 = 1&nbsp;<br />
+所以存入槽点为1， 1就是他的散列值</span></p><p><br />
+<span style="font-size:14px">2. 平方取中法<br />
+先对数据平方计算，再取中间两位，最后对散列表大小求余</span></p><p><span style="font-size:14px">例如： 44<br />
+44^2 = 1936<br />
+取中间两位 93<br />
+求余 93%11 = 5&nbsp;</span></p><p><span style="font-size:14px">所以散列值为5</span></p><p><span style="font-size:14px">折叠法适合位数较长的数字，平方取中适合位数较短的数字</span></p><p><br />
+<span style="font-size:14px">B. 针对非数字<br />
+可以对每一个字符获取其ASCII，再相加，最后取余：<br />
+cat -&gt; ord(&quot;c&quot;) + ord(&quot;a&quot;) + ord(&quot;t&quot;) =99+97+116 = 312<br />
+312 % 11 = 4&nbsp;</span></p><p><span style="font-size:14px">可能遇到变位词的情况，例如： cat 和 act<br />
+此时可以对每一个字符设置权重避免冲突</span></p><p><span style="font-size:14px">cat -&gt; ord(&quot;c&quot;) + ord(&quot;a&quot;)*2 + ord(&quot;t&quot;)*3 =99+97*2+116*3 = 641</span></p><p><span style="font-size:14px">act -&gt; ord(&quot;a&quot;) + ord(&quot;c&quot;)*2 + ord(&quot;t&quot;)*3 =97+99*2+116*3 = 643</span></p><p><br />
+<span style="font-size:14px">注意：<br />
+散列函数不能太复杂，因为使用散列函数是为了查找，散列函数的复杂度增加会直接导致查找的复杂度增加。</span></p><p><span style="font-size:14px">存储也会用到散列函数，如果散列函数太复杂也会增加存储的效率。</span></p><p><span style="font-size:14px">总之： 散列函数的算法不能复杂，不要让散列函数成为存储和查找过程中的计算负担。</span></p><p><span style="font-size:14px">如果散列函数太复杂导致花大量的计算资源去计算槽号，那还不如简单的用顺序查找或二分查找</span></p><p><span style="font-size:14px">记住，散列函数是为了降低查找的时间复杂度而不是增加复杂度</span></p><p><span style="font-size:14px">散列表冲突的解决方案<br />
+我们说完美的散列函数可以计算出唯一的散列值从而做到解决槽号冲突<br />
+但是现实中并没有完美的散列函数，即使是md5或者sha函数也会在极小的概率中取到相同的散列值</span></p><p><span style="font-size:14px">那么如何在散列值相同的情况下解决冲突问题就是下面要介绍的内容：</span></p><p>&nbsp;</p><p><span style="font-size:14px"><strong>1.开放定址 &nbsp; &nbsp;open addressing</strong></span><br />
+<span style="font-size:14px">该算法思路如下：<br />
+如果计算出来的散列值相同，则往后扫描，直到碰到一个空槽；如果到散列表尾部还没找到则从首部接着扫描</span></p><p><span style="font-size:14px">例如一个11长度的列表中放 77(0) 26(4) 93(5) 17(6) 31(9) 54(10) 20(3) 44(0) 55(0) 这几个数，括号内是这个值所在槽点</span></p><p><span style="font-size:14px">发现 0号槽点有三个冲突 44,55,77。 77已经先放到了0号槽点。<br />
+那么44就会把槽点数加1，发现1号槽点是空的，于是44存入1号槽点。<br />
+再存55,55槽点数+1 发现1号槽点已经被44占据，所以在+1，存入2号槽点。</span></p><p><br />
+<span style="font-size:14px">查找的时候，比如查44，会先在0号槽点找，发现找不到，此时就会从0号槽点顺序查找，直到找到44（成功）或者碰到空槽（失败）或者遍历完一次完整的散列表也没找到（失败）。</span></p><p><br />
+<span style="font-size:14px">这种向后逐个槽寻找的方式是开放定址技术中的线性探测（liner probing)，也就是发现槽点被占据时往后找空槽点是+1的方式找的。</span></p><p><span style="font-size:14px">线性探测的缺点是由聚集的趋势，比如上面 77 44 55 就聚集在一起，变为相邻的。<br />
+这样的坏处是会影响其他项的插入，例如12 它的槽点本来是1号，但是1号被44占据了。然后12就会往后找槽点插入，那么12就又占据了其他数的槽点。这是一个连锁式的影响。</span></p><p><span style="font-size:14px">这个问题无法避免但是可以减轻，我们往后找槽点可以不是+1，而是+3或者+5等。但是+skip的这个skip不能被列表长度整除，例如列表长度是100 ，skip为5，那么会产生周期，造成很多空槽无法被探测到。<br />
+为此我们可以将列表长度设为素数，如11,13,17,19,23这样的素数。</span></p><p><span style="font-size:14px">开放定址的方法作出了以下牺牲：<br />
+a. 存储的复杂度增加（体现为存储冲突时，槽点的顺延）<br />
+b. 查找的复杂度增加（体现为查找时如果槽点不是要找的数值就会用顺序查找往后继续寻找）<br />
+所以 开放定址的时间复杂度增加了，效率降低</span></p><p><br />
+<span style="font-size:14px"><strong>2. 数据项链 &nbsp; &nbsp; Chaining</strong><br />
+我们允许散列表A中的一个槽可以存多个值，将一个槽中的多个值放入到一个新的表B中。此时表A的槽存的不是值本身，而是表B的地址。<br />
+不同的槽有不同的表B，槽号i存的表B表示为Bi</span></p><p><span style="font-size:14px">已上面的问题为例，77,44,55 放在长度为11的散列表A中，他们的槽点都是0号<br />
+于是 这三个值都放在0号槽点的列表 B0 中。</span></p><p><span style="font-size:14px">查找44的时候，先根据槽点0（A[0]）找到列表B0。<br />
+在对B0这个列表使用顺序查找。</span></p><p><span style="font-size:14px">数据项链作出以下牺牲：<br />
+a 存储数据到散列表时增加了内存空间占用（体现为数据冲突时新增一个表B来容纳更多数据）<br />
+b 查找时复杂度增加（体现为根据槽点找到表B后还要用顺序查找）,其时间复杂度介于 O(1)~O(n)</span></p><p><span style="font-size:14px">虽然如此但是也不失为是一个很好的折中方式，当表A的槽冲突越少的时候，它的时间复杂度越接近O(1)</span></p><p><span style="font-size:14px">抽象数据类型 &ldquo;映射表&rdquo; &nbsp; ADT Map<br />
+映射表是一种结构为 key-value 的无需集合，key是唯一的</span></p><p><span style="font-size:14px">python中的字典就是一种映射Map</span></p><p>&nbsp;</p><p><span style="font-size:14px">下面我们自己动手实现一个映射表。</span></p><pre>
+<code class="language-python">
+# 使用简单求余为散列函数，线性探测加1作为解决冲突的方式实现ADT Map
+class ADTMap:       # 映射表 key-value结构的表
+    def __init__(self,size=11):
+        self.size = size     # 将映射表的长度设为一个质数
+        self.keys = [None] * self.size    # 用于存储映射表的key
+        self.data = [None] * self.size     # 用于存储映射表的value    # 简单求余
+    def __hashfunction(self,key):
+        return key % self.size      # 返回余数作为散列值（槽号）    # 开放定址，线性探测加1
+    def __rehash(self,oldhash):
+        return (oldhash+1) % self.size  # 返回新槽号，可能是在原槽号的基础+1，可能变回为0    # key是槽号
+    def put(self,key,data):
+        # 计算key的槽号（即key所在self.keys中的位置）
+        slot = self.__hashfunction(key)
+        # print(slot)
+        # 如果key对应的槽号为空或者不为空但是为key本身，则key和data入驻该槽号对应的槽（新增和修改）
+        if self.keys[slot] == None or self.keys[slot] == key:
+            # print(111)
+            self.keys[slot] = key
+            self.data[slot] = data
+        else:   # 到这里表示该槽已被其他节点占据，需要线性探测
+            newSlot = self.__rehash(slot)            # 如果新槽已经被占据，则往下找新的槽点，直到找到了空槽点就将key和value放到这个新槽点中
+            while self.keys[newSlot] != None:
+                if newSlot == slot:
+                    raise Exception("ADTMap has been full！")                newSlot = self.__rehash(newSlot)            self.keys[newSlot] = key
+            self.data[newSlot] = data    def get(self,key):
+        slot = self.__hashfunction(key)        if self.keys[slot] == key:
+            return self.data[slot]
+        else:   # 如果对应槽点的key不是我要找的key则往下一个槽点找
+            newSlot = self.__rehash(slot)            # 三种情况：
+            # 新槽点的key是要找的key，此时返回data
+            # 新槽点的key是None，说明根本没有这个key
+            # 新槽点的key不是要找的key或者不为None，也说明根本没这个key
+            while self.keys[newSlot] != key and self.keys[newSlot] != None:
+                newSlot = self.__rehash(newSlot)
+                if newSlot == slot:
+                    return None            return self.data[newSlot]   # 可能是要找的key对应的值，可能是none    # 使得ADTMap 可以通过[] 获取元素
+    def __getitem__(self, key):
+        return self.get(key)    # 使得ADTMap 可以通过[] 设置元素
+    def __setitem__(self, key, value):
+        self.put(key,value)    # 查看Map中的内容
+    def __str__(self):
+        mapStr = "{"
+        for key in self.keys:
+            if key != None:
+                mapStr += str(key)+":"+str(self[key])+", "
+        mapStr = mapStr.strip(", ")        mapStr = mapStr+"}"
+        return mapStr
+if __name__ == "__main__":
+    adtMap = ADTMap(100)    # 设置随机的key，key只能为数字不能为字符串；以key的平方作为value
+    try:
+        # 生成100个不重复的随机数
+        dataDict = {i:i*i for i in sample(range(1,200),101)}
+        for key,value in dataDict.items():
+            adtMap[key] = value
+    except BaseException as e:
+        print(e)        # 结果为
+        # {180:32400, 101:10201, 102:10404, 3:9, 104:10816, 103:10609, 79:6241, 107:11449, 95:9025, 109:11881, 2:4, 96:9216, 12:144, 13:169, 114:12996, 15:225, 115:13225, 17:289, 116:13456, 119:14161, 20:400, 120:14400, 122:14884, 191:36481, 184:33856, 125:15625, 126:15876, 27:729, 28:784, 129:16641, 130:16900, 131:17161, 132:17424, 133:17689, 33:1089, 34:1156, 36:1296, 37:1369, 38:1444, 139:19321, 29:841, 41:1681, 35:1225, 43:1849, 39:1521, 145:21025, 46:2116, 146:21316, 148:21904, 42:1764, 136:18496, 151:22801, 52:2704, 53:2809, 54:2916, 153:23409, 31:961, 57:3249, 157:24649, 59:3481, 160:25600, 137:18769, 62:3844, 63:3969, 164:26896, 161:25921, 166:27556, 67:4489, 44:1936, 56:3136, 142:20164, 118:13924, 55:3025, 173:29929, 174:30276, 75:5625, 176:30976, 77:5929, 177:31329, 178:31684, 80:6400, 81:6561, 82:6724, 183:33489, 84:7056, 185:34225, 186:34596, 187:34969, 87:7569, 181:32761, 90:8100, 91:8281, 192:36864, 93:8649, 193:37249, 195:38025, 194:37636, 197:38809, 98:9604, 99:9801}
+    print(adtMap)    
+    # 验证数据是否正确
+    print(adtMap[10])
+    print(adtMap[20])
+    print(adtMap[30])</code></pre><p>&nbsp;</p><pre>
+<code class="language-python"># 使用简单求余为散列函数，数据项链作为解决冲突的方式实现ADT Map
+class ChainADTMap:       # 映射表 key-value结构的表
+    def __init__(self,size=11):
+        self.size = size     # 将映射表的长度设为一个质数
+        self.keys = [None] * self.size    # 用于存储映射表的key
+        self.data = [None] * self.size     # 用于存储映射表的value    # 简单求余
+    def __hashfunction(self,key):
+        return key % self.size      # 返回余数作为散列值（槽号）    @staticmethod
+    def seque_search(alist,value):      # 返回值所在下标
+        index = 0
+        while index &lt; len(alist):
+            print(111)
+            if alist[index] == value:
+                return index
+            index += 1        return None    def put(self,key,data):
+        # 计算key的槽号（即key所在self.keys中的位置）
+        slot = self.__hashfunction(key)        # 如果key对应的槽号为空，则初始化2个空的子链表并将key和value放到子链表中
+        if self.keys[slot] == None:
+            self.keys[slot] = [key]
+            self.data[slot] = [data]
+        else:   # 如果槽号冲突，则把key和data添加到子链表中
+            self.keys[slot].append(key)
+            self.data[slot].append(data)    def get(self,key):
+        slot = self.__hashfunction(key)        if self.keys[slot] == None:     # 说明该槽点不存在子列表，数据不存在
+            return None
+        else:
+            # 说明这个key所在的槽点已经存过至少1一个值，即子列表存在；然后再使用顺序查找从子列表中查找数据
+            index = self.__class__.seque_search(self.keys[slot],key)
+            if index == None:   # 说明子列表中没有数据
+                return None
+            return self.data[slot][index]
+    # 使得ADTMap 可以通过[] 获取元素
+    def __getitem__(self, key):
+        return self.get(key)    # 使得ADTMap 可以通过[] 设置元素
+    def __setitem__(self, key, value):
+        self.put(key,value)    # 查看Map中的内容
+    def __str__(self):
+        mapStr = "{"
+        for key in self.keys:
+            if key != None:
+                for k in key:
+                    mapStr += str(k)+":"+str(self[k])+", "
+        mapStr = mapStr.strip(", ")        mapStr = mapStr+"}"
+        return mapStrif __name__ == "__main__":
+    adtMap = ChainADTMap(100)    # 设置随机的key，key只能为数字不能为字符串；以key的平方作为value
+    try:
+        # 生成100个不重复的随机数
+        dataDict = {i:i*i for i in sample(range(1,200),101)}
+        for key,value in dataDict.items():
+            adtMap[key] = value
+    except BaseException as e:
+        print(e)    # print(adtMap)    # 验证数据是否正确
+    print(adtMap[10])
+    print(adtMap[20])
+    print(adtMap[30])
+</code></pre><p>&nbsp;</p><p><br />
+<span style="font-size:14px">总结如下：<br />
+当使用线性探测解决冲突问题的ADTMap：<br />
+如果要找的key不在ADTMap中，则get()的时间复杂度为 O(n)<br />
+如果要找的key在ADTMap中，而且其槽点刚好就是key的余数，则get()的复杂度为 O(1)<br />
+如果要找的key在ADTMap中，而且其槽点不是key的余数，则get()的复杂度在O(1)~O(n)<br />
+所以 get() 的总体时间复杂度为 O(1)~O(n)</span></p><p><span style="font-size:14px">同理 put() 的时间复杂度为 O(1)~O(n) 因为当槽点冲突的时候也要用循环进行线性探测</span></p><p><span style="font-size:14px">当使用数据项链解决冲突问题的ChainADTMap：<br />
+如果要找的key不在ADTMap中，则get()的时间复杂度为 O(1)<br />
+如果要找的key在ADTMap中，则get()的复杂度为 O(1)~O(n) （当使用顺序查找的时候复杂度为O(k),k取决于该槽点子列表的元素个数，如果你的运气很不好，所有数据都放在一个槽点，那么此时k=n，复杂度就是O(n)，但这种情况几乎不可能）</span></p><p><span style="font-size:14px">由于 put() 使用的是append操作，所以是O(1)</span></p><p><span style="font-size:14px">但是数据项链使用了更多的存储空间</span><br />
+&nbsp;</p>
+			</div>
+				
+				<div class="zhuanzai-box">
+				<p>
+					如果您需要转载,可以点击下方按钮可以进行复制粘贴;本站博客文章为原创,请转载时注明以下信息
+				</p>
+				<p class="banquan-info">
+					<a href="https://www.zbpblog.com">张柏沛IT技术博客</a> > <a href="https://www.zbpblog.com/blog-190.html">数据结构与算法python语言实现(四)  查找和排序</a>
+				</p>
+				<p style="text-align:center">
+					<button type="button" id="zz" class="btn btn-primary" style="width:200px;">点击复制转载该篇文章</button>
+				</p>
+			</div>
+			</div>
+			
+			
+				
+			<div class="related_tags">
+					<span>相关标签：</span>
+					<ul class="related_tags_ul">
+											<li class="float related_tags_li"><a href="/tag9-理论技巧" target="_blank">理论技巧</a></li>
+											<li class="float related_tags_li"><a href="/tag43-数据结构与算法" target="_blank">数据结构与算法</a></li>
+											<li class="float related_tags_li"><a href="/tag1-Python" target="_blank">Python</a></li>
+										</ul>
+				</div>
+			
+			<div class="neighbour">
+				<div class="neighbour-div neighbour-last">
+					<span>上一篇</span><br>
+					<a href="/blog-189.html">数据结构与算法python语言实现(三)  递归</a>
+				</div>
+				<div class="neighbour-div neighbour-next">
+					<span>下一篇</span><br/>
+					<a href="/blog-191.html">数据结构与算法python语言实现(五)  树</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="c-right">
+		<div class="section-head">
+			热门推荐
+		</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐文章
+	</div>
+	<ul class="right-ul">
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-123.html" target="_blank">Python数据可视化（一） matplotlib,seaborn,pandas绘制折线图和饼图</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-107.html" target="_blank">Python数据分析小案例&mdash;&mdash;红楼梦文本分析（三） KMeans聚类</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-32.html" target="_blank">Python初级爬虫实战（一）之爬取图片网的图片</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-110.html" target="_blank">爬虫进阶之Scrapy（七） 使用selenium模拟浏览器动态爬取</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-29.html" target="_blank">Python爬虫入门（二） 使用BeautifulSoup解析网页内容</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-27.html" target="_blank">Python爬虫入门（一） 使用requests模块获取网页</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-26.html" target="_blank">Python教程之使用pymysql操作Mysql数据库</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-122.html" target="_blank">python+selenium模拟百度搜索并点击链接</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-83.html" target="_blank">爬虫进阶之Scrapy（一） scrapy框架安装（Windows端，Centos和Ubantu）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-102.html" target="_blank">Python数据分析基础（九） 使用Seaborn绘制图像</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-105.html" target="_blank">Python数据分析小案例&mdash;&mdash;红楼梦文本分析（一） 文本预处理</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-170.html" target="_blank">python 多线程 + DBUtils连接池操作数据库（附python之GIL）</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-171.html" target="_blank">Python 多线程+多进程+任务队列爬取文章</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-95.html" target="_blank">Python数据分析基础之Pandas（六） 数据计算</a>
+		</li>
+			<li>
+			<span class="blog-type color1">文章</span><a href="/blog-104.html" target="_blank">Python：使用jieba分词和wordcloud实现词云</a>
+		</li>
+		</ul>
+</div>
+					<div class="right-content">
+	<div class="right-head">
+		推荐新闻
+	</div>
+	<ul class="right-ul">
+		</ul>
+</div>
+			</div>
+<div class="m-modal">	
+    <div class="m-middle2">
+    
+    </div>
+</div>
+<script>
+	$(function(){
+	
+		var m1 = new MyModal.modal();
+		
+		$(".cont").on("click","img",function(){
+            let src = $(this).attr("src")
+			$(".m-middle2").html(`<img src="${src}">`)
+			m1.show();
+		});
+        
+        $(".m-modal,.m-middle2").click(function(){
+            m1.hide();
+        })
+	})
+	
+</script>
+	<script src="/statics/js/clipboard.min.js"></script>
+	<script src="/statics/js/copy_blog.js"></script>
+</div>
+<div style="clear:both;"></div>
+<div id="footer">
+	<div class="footer-inner">
+		<div class="footer-logo">
+			<a href="/" rel="home">
+				<img src="/logo.jpg" title="" alt=""/>
+			</a>
+		</div>
+		<div class="footer-cate pc">
+			<ul>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-php" target="blank">PHP</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-python" target="blank">Python</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-seo" target="blank">SEO优化</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-linux" target="blank">Linux</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-mysql" target="blank">MySQL</a>
+					</li>
+									
+					<li class="footer-cate-li float">
+						<a href="/cate-web" target="blank">Web前端</a>
+					</li>
+								<li class="footer-cate-li float">
+					<a href="/about" target="blank">关于作者</a>
+				</li>
+			</ul>
+			
+			
+		</div>
+		
+	</div>
+	<center id="ba">张柏沛的个人IT技术博客 © www.zbpblog.com - <a href="http://beian.miit.gov.cn" target="_blank">粤ICP备19143107号</a><br/><a href="/sitemap.xml" title="网站地图" target="_blank">网站地图</a></center>
+	
+</div><script type="text/javascript" src="/statics/js/jquery.lazyload.js"></script>
+<script type="text/javascript" src="/statics/js/main.js"></script></body>
+</html>
