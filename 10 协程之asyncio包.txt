@@ -77,7 +77,7 @@ loop.run_until_complete(asyncio.wait(tasks))       # 开始事件循环
 
 但是在python 3.8之后，asyncio.coroutine装饰器就已经废除，改为使用async 和 await
 
-将上面的代码改为使用async 和 await
+将上面的代码改为使用async 和 await; async 就相当于上例的@asyncio.coroutine，await相当于上例的yield from
 # coding=utf-8
 
 import asyncio, time
@@ -630,7 +630,9 @@ asyncio.run(func())
 执行到 async with 会自动调用 __aenter__ 
 当跳出async with 代码块的时候会执行 __aexit__
 
-async with 也必须在协程中使用，所以要把它放在协程函数 func 中
+async with 也必须在协程中使用，所以要把它放在协程函数 func 中。
+
+在协程中，如果执行到async with ，意味着可能会等待而切换协程，对于async with 的理解，我会在介绍aiomysql的连接池的时候用例子来说明。
 
 =================================
 
@@ -770,5 +772,19 @@ E.main主协程，用于把上面的协程加入任务列表（协程池）的�
 3.mysql使用mysql连接池复用mysql连接，这样就不用每次操作mysql都连接一次，减少了网络io等待
 
 4.我希望发起url请求使用的都是一个连接，避免每请求一次要连接一次，节省等待连接的时间
+
+在正式实现代码之前，先介绍一下aiomysql和aiohttp的用法：
+
+==================================================
+
+aiomysql
+
+官方文档：https://aiomysql.readthedocs.io/en/latest/
+如果想看中文文档，可以参考本博客网站关于aiomysql的文章，该文章是我把官方文档翻译了之后的中文文档。
+
+aiohttp(这里仅介绍aiohttp做客户端使用)
+
+官方文档：https://docs.aiohttp.org/en/stable/client_quickstart.html
+
 
 下面是代码实现：

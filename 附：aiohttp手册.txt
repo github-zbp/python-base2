@@ -1,0 +1,103 @@
+1.请求一个url
+
+import aiohttp, asyncio
+
+async def fetch(url):
+	async with aiohttp.request('GET', url) as resp:
+		if resp.status == 200:
+			print(await resp.text())
+			
+loop = asyncio.get_event_loop()
+loop.run_until_complete(fetch("http://zbpblog.com"))
+
+进入async with 代码块时，会建立连接，发起get请求，这个过程是要等待的，线程会切换到其他协程运行。当服务器返回响应时，客户端读事件就绪，协程恢复运行，将响应封装为 resp 对象。
+resp.text()	 # 将响应内容解码为utf-8 ，这个过程也是要等待的，所以要用到await。
+使用这种方式的请求url所建立的连接一般都是短连接，请求完一个url后，服务端会自动关闭连接，下次请求的时候，客户端要发起新的连接请求，也就是要重新建立连接。
+这对于爬取多个页面的程序来说效率是比较低的。此时可以使用连接池请求。
+
+2.使用连接池请求
+下面直接使用官网的例子：
+async with aiohttp.ClientSession() as session:
+    async with session.get('http://httpbin.org/get') as resp:
+        print(resp.status)
+        print(await resp.text())
+		
+调用 ClientSession 时，会建立一个 session 会话对象，这个对象中包含了一个连接池，里面放置了多个连接，而且里面的连接都是keep-alive长连接，可以用来发起多次请求。
+
+在上面的例子中，
+async with aiohttp.ClientSession() as session 会创建一个连接池
+
+而 async with session.get('http://httpbin.org/get') as resp 会从连接池中取出一个连接发起get请求
+
+当跳出 async with session.get(xxx) 这个代码块的时候，会将连接放回连接池以备复用。
+
+当跳出 async with ClientSession() as session 这个代码块的时候，会隐式调用 session.close() 方法将连接池中所有的连接关闭。
+
+
+按照官方的说法，不能没请求一次都建立一个连接池，而是建立一个连接池，用里面的连接完成所有请求（这意味着我要在一个async with ClientSession()代码块中完成所有的请求）。
+
+如果不使用 async with 结构建立连接池的话，可以用下面这种方式：
+session = aiohttp.ClientSession()
+async with session.get('...'):
+    # ...
+await session.close()
+
+二者是等效的。
+
+
+下面介绍以下 ClientSession() 的参数：
+用的比较多的是connector,headers,cookies。headers和cookies写过爬虫的可能都认识了，这里只谈一下connector。
+
+connector是aiohttp客户端API的传输工具。并发量控制，ssl证书验证，都可通过connector设置，然后传入ClientSession。
+
+标准connector有两种：
+A. TCPConnector用于常规TCP套接字（同时支持HTTP和 HTTPS方案）(绝大部分情况使用这种)。
+
+B. UnixConnector 用于通过UNIX套接字进行连接（主要用于测试）。
+
+所有连接器类都应继承自BaseConnector。
+
+例子：
+#创建一个TCPConnector
+conn=aiohttp.TCPConnector(verify_ssl=False)
+#作为参数传入ClientSession
+async with aiohttp.ClientSession(connector=conn) as session:
+	# ...
+	pass
+	
+
+TCPConnector比较重要的参数有
+
+verify_ssl（bool）–布尔值，对HTTPS请求执行SSL证书验证 （默认情况下启用）。当要跳过对具有无效证书的站点的验证时可设置为False。
+
+limit（int）–整型，连接池中的并发连接数。如果为limit为 None则connector没有限制（默认值：100）。
+
+limit_per_host（int）–限制同时连接到同一端点的总数。如果(host, port, is_ssl)三者相同，则端点是相同的。如果为limit=0，则connector没有限制（默认值：0）。
+
+
+
+
+3. 请求时传入请求参数/header/cookie 
+假设是通过连接池的方式进行连接，则header和cookie的传递可以在 ClientSession(headers=headers, cookies=cookies) 建立连接池的时候就传进去, headers和cookies都是一个字典。
+
+如果是请求参数的传递，可以这样：
+session.get(url, params=params)
+session.post(url, params=params)	# params 是一个字典
+
+如果想发起一个json请求，可以传递json格式的数据，可以这样
+session.post(url, json=json_data)		# json_data 也是一个字典
+
+当然也可以在 get 和 post 方法上传递 cookies 和 headers 参数
+
+
+4.resp 对象
+resp对象将请求返回的结果给封装了起来。
+
+resp的方法和属性：
+resp.url 		# 请求的url
+resp.status 	# 状态码
+await resp.text()    # 解编码后的响应内容，返回的是一个列表
+await resp.read()  # 未解编码的响应内容，是二进制的格式，像下载图片就可以用这个
+await resp.json()  # 如果你请求的是一个返回json格式的接口，可以用json()方法将响应解析为json格式
+
+
