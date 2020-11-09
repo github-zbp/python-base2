@@ -5,12 +5,12 @@ from asyncio import Queue
 from bs4 import BeautifulSoup
 
 class Crawler:
-    def __init__(self, baseUrl, dbCfg, listUrlInfo, picPath = './pic1', pageRows=10, maxCoroNum = 20, tcpConnNum = 20, maxMonitorCount = 10):
+    def __init__(self, baseUrl, dbCfg, listUrlInfo, picPath = './pic2', pageRows=10, maxCoroNum = 20, tcpConnNum = 20, maxMonitorCount = 10, insertRows = 20):
         self.baseUrl = baseUrl.strip('/') + "/"
         self.picPath = picPath              # 下载图片到本地的目录
-        self.queue = Queue(maxsize=50)     # 队列，用于放要爬取的url，长度为500
+        self.queue = Queue(maxsize=50)     # 队列，用于放要爬取的url，长度为50
         self.dbCfg = dbCfg
-        self.sem = asyncio.Semaphore(maxCoroNum)     # 使用信号量限制并发的协程的最大数量
+        self.sem = asyncio.Semaphore(maxCoroNum)     # 使用信号量限制并发的coro协程的最大数量
         self.tcpConnNum = tcpConnNum    # tcp连接池中最大并发连接数
         self.session = None             # 存放会话连接池的session对象
         self.dbPool = None              # Mysql连接池
@@ -21,6 +21,10 @@ class Crawler:
         self.lockForSql = asyncio.Lock()    # 用于同步多个数据入库的协程的锁
         self.monitorCount = 0       # 任务监控计数器
         self.maxMonitorCount = maxMonitorCount
+
+        ############################################
+        self.dbQueue = Queue(maxsize=500)       # 存放数据入库任务
+        self.dbSem = asyncio.Semaphore(maxCoroNum)      # 用于限制并发的 insertDb 协程的最大数量
 
     # 开启事件循环(启动协程)
     def startLoop(self):
@@ -33,11 +37,12 @@ class Crawler:
     # 主协程
     async def start(self):
         # 在开始爬取之前，先创建mysql连接池
-        self.pool = await aiomysql.create_pool(loop=self.loop, maxsize = 100, minsize = 100, pool_recycle = 100, **self.dbCfg)
+        self.pool = await aiomysql.create_pool(loop=self.loop, maxsize = 50, minsize = 50, **self.dbCfg)
 
         # 开启 produceListUrl 和 consume 这两个协程，将他们加入到任务列表中开始执行
         asyncio.create_task(self.produceListUrl())
         asyncio.create_task(self.consume())
+        asyncio.create_task(self.dbConsume())       # 开启 dbConsume 协程不断生成 insertDb子协程进行数据入库
 
         # 开启一个monitor协程用于所有任务完成的时候停止事件循环
         # asyncio.create_task(self.monitor())
@@ -77,7 +82,7 @@ class Crawler:
             while True:     # 不停的从self.queue中取出task任务,task任务是我自己封装的一个字典,包含要爬取的url和其他属性
                 task = await self.queue.get()  # 从自定义的asyncio队列中取出任务，这个操作可能发生等待（当队列中没有任务时，get方法会等待）
 
-                self.sem.acquire()  # 信号量限制并发协程的个数，当并发的coro协程数量超过 maxCoroNum的时候，此行代码会发生等待而切换协程
+                self.sem.acquire()
                 print("取出任务：" + str(task))
                 if task['url'].find('images') > 0 or task['url'].find('img') > 0:  # 说明该任务是爬取图片
                     coro = self.crawlPicture(task)
@@ -110,27 +115,27 @@ class Crawler:
                     print("响应码错误:%s | %s" % (str(resp.status), resp.url))
                     return None
         except BaseException as e:
-            print("发生错误：", e)
+            print("连接发生错误：", e)
             return None
 
     # 爬取列表页url,获取其中的详情页url
     async def crawlListUrl(self, task):
-        # try:
-        listUrl, tname = task['url'], task['tname']
-        json_data = await self.getUrl(listUrl, type=2)   # 返回的是json字典,里面包含多个详情页url的id
+        try:
+            listUrl, tname = task['url'], task['tname']
+            json_data = await self.getUrl(listUrl, type=2)   # 返回的是json字典,里面包含多个详情页url的id
 
-        for data in json_data:
-            detailUrl = self.__joinUrl(data['id'], tname)       # 根据详情页id得到详情页url
+            for data in json_data:
+                detailUrl = self.__joinUrl(data['id'], tname)       # 根据详情页id得到详情页url
 
-            if task['url'] in self.crawledUrl:  # 判断详情页url是否已经爬取过
-                continue
-            else:
-                await self.queue.put({"url" : detailUrl})     # 将详情页url放入队列待爬取
-
-        self.sem.release()
-        # except BaseException as e:
-        #     print(task)
-        #     print("出现错误: " , e)
+                if task['url'] in self.crawledUrl:  # 判断详情页url是否已经爬取过
+                    continue
+                else:
+                    await self.queue.put({"url" : detailUrl})     # 将详情页url放入队列待爬取
+        except BaseException as e:
+            print(task)
+            print("出现错误: " , e)
+        finally:
+            self.sem.release()
 
     # 爬取详情页url
     async def crawlDetailUrl(self, task):
@@ -140,9 +145,7 @@ class Crawler:
             # 解析html中的内容,返回data字典和imgSrc列表
             data, imgSrcs = self.parseHtml(html, task['url'])     # 纯cpu操作，没有io，无需await
 
-            # 执行数据入库，将数据入库的协程放入任务列表中并发运行, 下面我用了2种写法, 两种都行,后者会边爬边入库,前者会一直爬爬了很多很多url后才开始入库
-            asyncio.create_task(self.insertDb(data))  # 把 insertDb 放到事件循环并发执行,create_task方法不会发生任何等待
-            # await self.insertDb(data)                     # 让crawlDetailUrl协程 等待 insertDb 子协程运行完
+            await self.dbQueue.put(data)  # 添加 数据入库 任务
 
             # 将图片放入到url队列中，让负责下载图片的那个协程从队列取出url下载图片
             # (await self.queue.put({ "url": src, "fp":localPath}) for localPath, src in imgSrcs.items())    # 傻呀,用什么生成器表达式呀,生成器表达式定义的时候,里面的代码不会执行的!
@@ -176,6 +179,16 @@ class Crawler:
         finally:
             self.sem.release()
             f.close()
+
+    # 数据入库任务的消费者
+    async def dbConsume(self):
+        while True:     # 循环取出dbQueue任务
+            dbTask = await self.dbQueue.get()
+
+            self.dbSem.acquire()
+            asyncio.create_task(self.insertDb(dbTask))
+
+
     # 数据入库
     async def insertDb(self, data):
         try:
@@ -208,6 +221,8 @@ class Crawler:
         except BaseException as e:
             print("mysql 连接错误:", e)
             print("mysql连接错误对应url %s" % data['url'])
+        finally:
+            self.dbSem.release()
 
     # 拼接详情页url
     def __joinUrl(self, article_id, cate_name):
@@ -288,5 +303,5 @@ if __name__ == "__main__":
         'arts':{'tid':1, 'page':300}
     }
 
-    crawler = Crawler("https://www.fx112.com/", dbCfg, listUrlInfo, maxCoroNum = 100, tcpConnNum = 40, maxMonitorCount = 100)
+    crawler = Crawler("https://www.fx112.com/", dbCfg, listUrlInfo, maxCoroNum = 50, tcpConnNum = 40, maxMonitorCount = 100)
     crawler.startLoop()

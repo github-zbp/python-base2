@@ -1,3 +1,6 @@
+ÒÔÏÂÄÚÈİÈ«²¿À´×Ô¹Ù·½ÎÄµµ£¬¾­¹ı·­ÒëºÍĞ¡Ğ¡µÄĞŞÊÎºóÌù³öÀ´µÄ£¬±¾ÎÄ½ö½éÉÜaiohttp¿â×÷Îª¿Í»§¶ËµÄÓÃ·¨
+ÎÄµµµØÖ·£ºhttps://docs.aiohttp.org/en/stable
+
 1.ÇëÇóÒ»¸öurl
 
 import aiohttp, asyncio
@@ -14,6 +17,8 @@ loop.run_until_complete(fetch("http://zbpblog.com"))
 resp.text()	 # ½«ÏìÓ¦ÄÚÈİ½âÂëÎªutf-8 £¬Õâ¸ö¹ı³ÌÒ²ÊÇÒªµÈ´ıµÄ£¬ËùÒÔÒªÓÃµ½await¡£
 Ê¹ÓÃÕâÖÖ·½Ê½µÄÇëÇóurlËù½¨Á¢µÄÁ¬½ÓÒ»°ã¶¼ÊÇ¶ÌÁ¬½Ó£¬ÇëÇóÍêÒ»¸öurlºó£¬·şÎñ¶Ë»á×Ô¶¯¹Ø±ÕÁ¬½Ó£¬ÏÂ´ÎÇëÇóµÄÊ±ºò£¬¿Í»§¶ËÒª·¢ÆğĞÂµÄÁ¬½ÓÇëÇó£¬Ò²¾ÍÊÇÒªÖØĞÂ½¨Á¢Á¬½Ó¡£
 Õâ¶ÔÓÚÅÀÈ¡¶à¸öÒ³ÃæµÄ³ÌĞòÀ´ËµĞ§ÂÊÊÇ±È½ÏµÍµÄ¡£´ËÊ±¿ÉÒÔÊ¹ÓÃÁ¬½Ó³ØÇëÇó¡£
+
+
 
 2.Ê¹ÓÃÁ¬½Ó³ØÇëÇó
 ÏÂÃæÖ±½ÓÊ¹ÓÃ¹ÙÍøµÄÀı×Ó£º
@@ -33,8 +38,10 @@ async with aiohttp.ClientSession() as session »á´´½¨Ò»¸öÁ¬½Ó³Ø
 
 µ±Ìø³ö async with ClientSession() as session Õâ¸ö´úÂë¿éµÄÊ±ºò£¬»áÒşÊ½µ÷ÓÃ session.close() ·½·¨½«Á¬½Ó³ØÖĞËùÓĞµÄÁ¬½Ó¹Ø±Õ¡£
 
+×¢Òâ£ºÉÏÀıµÄ session ¶ÔÏó²»ÊÇÒ»¸öÁ¬½Ó£¬¶øÊÇÒ»¸öÁ¬½Ó³Ø£¬ÀïÃæ°üº¬¶à¸öÁ¬½Ó¡£
 
-°´ÕÕ¹Ù·½µÄËµ·¨£¬²»ÄÜÃ»ÇëÇóÒ»´Î¶¼½¨Á¢Ò»¸öÁ¬½Ó³Ø£¬¶øÊÇ½¨Á¢Ò»¸öÁ¬½Ó³Ø£¬ÓÃÀïÃæµÄÁ¬½ÓÍê³ÉËùÓĞÇëÇó£¨ÕâÒâÎ¶×ÅÎÒÒªÔÚÒ»¸öasync with ClientSession()´úÂë¿éÖĞÍê³ÉËùÓĞµÄÇëÇó£©¡£
+
+°´ÕÕ¹Ù·½µÄËµ·¨£¬²»ÄÜÃ»ÇëÇóÒ»´Î¶¼½¨Á¢Ò»¸öÁ¬½Ó³Ø£¬¶øÊÇ½¨Á¢Ò»¸öÁ¬½Ó³Ø£¬ÓÃÀïÃæµÄÁ¬½ÓÍê³ÉËùÓĞÇëÇó£¨ÕâÒâÎ¶×ÅÎÒÒªÔÚÒ»¸öasync with ClientSession()´úÂë¿éÖĞÍê³ÉËùÓĞµÄÇëÇó£©¡£³ı·ÇÄãÒªÅÀÈ¡¶à¸ö²»Í¬ÓòÃûµÄÕ¾µã£¬´ËÊ±¾ÍÒª½¨Á¢¶à¸öÁ¬½Ó³Ø¡£
 
 Èç¹û²»Ê¹ÓÃ async with ½á¹¹½¨Á¢Á¬½Ó³ØµÄ»°£¬¿ÉÒÔÓÃÏÂÃæÕâÖÖ·½Ê½£º
 session = aiohttp.ClientSession()
@@ -75,19 +82,59 @@ limit£¨int£©¨CÕûĞÍ£¬Á¬½Ó³ØÖĞµÄ²¢·¢Á¬½ÓÊı¡£Èç¹ûÎªlimitÎª NoneÔòconnectorÃ»ÓĞÏŞÖÆ£
 limit_per_host£¨int£©¨CÏŞÖÆÍ¬Ê±Á¬½Óµ½Í¬Ò»¶ËµãµÄ×ÜÊı¡£Èç¹û(host, port, is_ssl)ÈıÕßÏàÍ¬£¬Ôò¶ËµãÊÇÏàÍ¬µÄ¡£Èç¹ûÎªlimit=0£¬ÔòconnectorÃ»ÓĞÏŞÖÆ£¨Ä¬ÈÏÖµ£º0£©¡£
 
 
+ÔÚ¹Ù·½ÎÄµµÖĞ£¬ÓĞ¶Ô ClientSession Á¬½Ó³Ø¹Ø±ÕµÄËµÃ÷ÈçÏÂ£º
+ÔÚÀë¿ªasync with ´úÂë¿é»òÕßÖ±½Óµ÷ÓÃ session.close()·½·¨Ö®ºó£¬Á¬½ÓÃ»ÓĞÂíÉÏ¹Ø±Õ£¬¶øÊÇ»áÔÚÒ»Ğ¡¸öË²¼äÖ®ºó²Å¹Ø±Õ¡£µ«ÊÇÈç¹ûÊÂ¼şÑ­»·ÔÚÁ¬½Ó¹Ø±ÕÖ®Ç°¾ÍÏÈÍ£Ö¹ÁËµÄ»°¾Í»á±¨Ò»¸ö¾¯¸æ£ºResourceWarning: unclosed transport¡£
+
+ÎªÁË±ÜÃâÕâÖÖÇé¿ö£¬ÒªÔÚ¹Ø±ÕÊÂ¼şÑ­»·Ö®Ç°ÉèÖÃÒ»¸öĞ¡Ğ¡µÄÑÓ³Ù£¬ÈÃÁ¬½ÓÏÈ×Ô¶¯¹Ø±ÕÁËÏÈ£¬ÔÙÍË³öÊÂ¼şÑ­»·¡£
+
+¶ÔÓÚÃ»ÓĞÉèÖÃSSLµÄ ClientSession £¬¿ÉÒÔ×öÒ»¸ö¼òµ¥µÄ await asyncio.sleep(0) ÑÓ³Ù¼´¿É¡£
+
+¶ÔÓÚÉèÖÃÁËSSLµÄ ClientSession£¬ĞèÒª×öÒ»¸ö0.25ÃëµÄÑÓ³Ù
+
+ÏÂÃæÊÇ¹Ù·½Àı×Ó£º
+async def read_website():
+    async with aiohttp.ClientSession() as session:
+        async with session.get('http://example.org/') as resp:
+            await resp.read()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(read_website())
+loop.run_until_complete(asyncio.sleep(0.25))	# ÕâÀïÏàµ±ÓÚÊÇÔÚ read_website() Ğ­³ÌÖ´ĞĞÍêÁËÖ®ºó£¬ÓÖÍùÊÂ¼şÑ­»·ÖĞÌí¼ÓÁËÒ»¸öË¯0.25ÃëµÄĞ­³Ì£¬Õâ¸öĞ­³ÌºÍ read_website Ğ­³ÌÊÇ´®ĞĞµÄ¡£ËùÒÔÖ´ĞĞµ½ÕâĞĞµÄÊ±ºò£¬Ïß³Ì»áÇĞ»»µ½Õâ¸öĞ­³ÌË¯0.25Ãë£¬´ËÊ±Õû¸öÏß³ÌÊÇ×èÈûµÄ¡£
+loop.close()		# ¹Ø±ÕÊÂ¼şÑ­»·
+
+
 
 
 3. ÇëÇóÊ±´«ÈëÇëÇó²ÎÊı/header/cookie 
 ¼ÙÉèÊÇÍ¨¹ıÁ¬½Ó³ØµÄ·½Ê½½øĞĞÁ¬½Ó£¬ÔòheaderºÍcookieµÄ´«µİ¿ÉÒÔÔÚ ClientSession(headers=headers, cookies=cookies) ½¨Á¢Á¬½Ó³ØµÄÊ±ºò¾Í´«½øÈ¥, headersºÍcookies¶¼ÊÇÒ»¸ö×Öµä¡£
 
 Èç¹ûÊÇÇëÇó²ÎÊıµÄ´«µİ£¬¿ÉÒÔÕâÑù£º
-session.get(url, params=params)
-session.post(url, params=params)	# params ÊÇÒ»¸ö×Öµä
+session.get(url, params=params)		# params ÊÇÒ»¸ö×Öµä
+session.post(url, params=params,data=data)	# paramsÊÇget²ÎÊı£¬dataÊÇpost²ÎÊıÒ²ÊÇ×Öµä
+
+»¹¿ÉÒÔ´«µİ ssl = False ²ÎÊı£¬²»ÑéÖ¤sslÖ¤Êé
 
 Èç¹ûÏë·¢ÆğÒ»¸öjsonÇëÇó£¬¿ÉÒÔ´«µİjson¸ñÊ½µÄÊı¾İ£¬¿ÉÒÔÕâÑù
 session.post(url, json=json_data)		# json_data Ò²ÊÇÒ»¸ö×Öµä
 
 µ±È»Ò²¿ÉÒÔÔÚ get ºÍ post ·½·¨ÉÏ´«µİ cookies ºÍ headers ²ÎÊı
+
+ÕâÀï»¹½éÉÜÁËÈçºÎÉÏ´«Ò»¸öÎÄ¼ş£º
+url = 'http://httpbin.org/post'
+files = {'file': open('report.xls', 'rb')}
+
+await session.post(url, data=files)
+
+»òÕß
+
+url = 'http://httpbin.org/post'
+data = FormData()
+data.add_field('file',
+               open('report.xls', 'rb'),
+               filename='report.xls',
+               content_type='application/vnd.ms-excel')
+
+await session.post(url, data=data)
 
 
 4.resp ¶ÔÏó
@@ -99,5 +146,28 @@ resp.status 	# ×´Ì¬Âë
 await resp.text()    # ½â±àÂëºóµÄÏìÓ¦ÄÚÈİ£¬·µ»ØµÄÊÇÒ»¸öÁĞ±í
 await resp.read()  # Î´½â±àÂëµÄÏìÓ¦ÄÚÈİ£¬ÊÇ¶ş½øÖÆµÄ¸ñÊ½£¬ÏñÏÂÔØÍ¼Æ¬¾Í¿ÉÒÔÓÃÕâ¸ö
 await resp.json()  # Èç¹ûÄãÇëÇóµÄÊÇÒ»¸ö·µ»Øjson¸ñÊ½µÄ½Ó¿Ú£¬¿ÉÒÔÓÃjson()·½·¨½«ÏìÓ¦½âÎöÎªjson¸ñÊ½
+resp.cookies		# ÏìÓ¦·µ»ØµÄcookie ÊÇÒ»¸ö×Öµä
+resp.headers
 
+
+5.´óÎÄ¼şÏÂÔØ
+Í¨¹ıÉÏÃæµÄtext(),read()ºÍjson()·½·¨»ñÈ¡ÏìÓ¦ÄÚÈİµÄÊ±ºò£¬»áÖ±½Ó°ÑÏìÓ¦ÄÚÈİĞ´Èëµ½ÓÃ»§Ì¬µÄÄÚ´æÖĞ£¬ËùÒÔ¼ÓÈëÄãÏëÏÂÔØ¼¸¸öGµÄÄÚÈİ±ÈÈçµçÓ°ÊÓÆµ¾Í²»ÊÊºÏÓÃÉÏÃæµÄ·½Ê½»ñÈ¡ÏìÓ¦ÄÚÈİ£¬·ñÔòÄÚ´æ»á±»³Å±¬µÄ¡£
+´ËÊ±¿ÉÒÔÊ¹ÓÃ resp.content À´»ñÈ¡ÏìÓ¦ÄÚÈİ£¬Ëû»áÒÔÎÄ¼şÁ÷µÄĞÎÊ½°ÑÏìÓ¦Ò»µãÒ»µãµÄ·µ»Ø¸øÓÃ»§Ì¬³ÌĞò¡£
+
+¹Ù·½Àı×Ó£º
+with open(filename, 'wb') as fd:
+    while True:		# Ã¿´Î¶ÁÈ¡1024¸ö×Ö½Ú²¢Ğ´Èëµ½±¾µØÎÄ¼şÖĞ¡£
+        chunk = await resp.content.read(1024)
+        if not chunk:
+            break
+        fd.write(chunk)
+		
+¹Ù·½ÊÖ²á¸øµÄÀı×ÓÊÇÓÃµÄpythonÄÚÖÃµÄÎÄ¼şio·½·¨£¬ÕâÊÇÍ¬²½×èÈûµÄ·½·¨¡£µ«ÊÇÔÚĞ­³ÌÖĞÊÇ²»ÄÜÊ¹ÓÃÍ¬²½×èÈû·½·¨µÄ£¬·ñÔò»á×èÈûÕû¸öÏß³Ì¡£ÕâÀïÓ¦¸ÃÊ¹ÓÃaiofiles¿â½øĞĞÒì²½ÎÄ¼şio¡£
+
+
+aiohttp»¹Ö§³ÖÒÔÁ÷µÄĞÎÊ½ÉÏ´«ÎÄ¼şºÍÊ¹ÓÃwebsockets¡£
+
+ÁíÍâ£¬aiohttp»¹Ö§³ÖÊ¹ÓÃproxy·´Ïò´úÀí¡£
+
+¾ßÌå¿ÉÒÔ²é¿´ÎÄµµ
 
